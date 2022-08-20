@@ -17,10 +17,10 @@ pub trait PathAware { //todo get shortest working path
     // either a list of all possible moves (left, right, up, down, etc)...
     // or know as a path
     // todo: maybe the index should not be i32
-    type CollectionOfMoves: PartialEq + IntoIterator<Item = Self::Move> + std::cmp::PartialOrd;
+    type CollectionOfMoves: Clone + PartialEq + IntoIterator<Item = Self::Move> + std::cmp::PartialOrd;
 
-    fn get_paths(&self) -> Vec<&Self::CollectionOfMoves>;
-    fn create_path(&mut self, path_to_create: Self::CollectionOfMoves);
+    fn get_paths(&self) -> &Vec<Self::CollectionOfMoves>;
+    fn create_path_from_move(&mut self, first_move: Self::Move);
     fn remove_paths_by_index(&mut self, path_indexes: Vec<usize>); // should use get_paths to get list of
                                                                    // possible paths to remove
     fn paths_intersect(&self, path_a: &Self::CollectionOfMoves, path_b: &Self::CollectionOfMoves) -> bool;
@@ -65,16 +65,24 @@ pub trait PathAware { //todo get shortest working path
 pub trait LocationAware: PathAware {
     const ALL_MOVES: Self::CollectionOfMoves;
 
-    // fn project_move(&self, path: &Self::CollectionOfMoves, move_to_try: Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
+    fn project_move(&self, path: &Self::CollectionOfMoves, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
 
-    // fn create_paths_for_all_moves_from_cell(&mut self, path: &Self::CollectionOfMoves, all_possible_moves: Self::CollectionOfMoves){
-    //
-    // }
+    fn create_new_paths_for_all_moves_from_path(&mut self, path: &Self::CollectionOfMoves){
+        for possible_move in Self::ALL_MOVES {
+            let res_of_move = self.project_move(path, &possible_move);
+
+            if let Ok(_new_location) = res_of_move {
+                // create new path with possible_move appended
+                // let _new_path = &(*path).clone();
+                todo!()
+            }
+        }
+    }
 }
 
 
 pub trait Bfs: LocationAware {
-    fn bfs(&mut self, _start_cell: Self::Cell, _target_cell: Self::Cell) {//-> Vec<Self::Move>{
+    fn bfs(&mut self, _start_cell: Self::Cell, _target_cell: Self::Cell) {
         todo!();
     }
 }
