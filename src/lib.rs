@@ -7,31 +7,34 @@
 //! todo!()
 
 pub trait LocationAware {
-    type Cell; // the smallest denominator of space
+    type Cell: PartialEq; // the smallest denominator of space
     type Move; // a way to encode different moves (up down left right, maybe diagonal, etc)
 
     fn get_current_location() -> Self::Cell;
     fn get_all_moves_from_current_location(current_location: Self::Cell) -> Vec<Self::Move>;
-    fn take_all_moves(all_possible_moves: Vec<Self::Move>);
+    fn make_all_moves(all_possible_moves: Vec<Self::Move>);
     fn is_target_cell(cell_to_check: &Self::Cell) -> bool;
 }
 
-pub trait Bfs {
-    type Cell;
-    type Move;
+pub trait Bfs: LocationAware {
+    fn bfs(&self, mut start_cell: Self::Cell, target_cell: Self::Cell) { //Vec<Self::Move>{
+        loop {
+            // get all the moves allowed from this location
+            let all_moves = Self::get_all_moves_from_current_location(start_cell);
 
-    fn bfs(&self, _start_cell: Self::Cell, _target_cell: Self::Cell) -> Vec<Self::Move>{
-        // get all of the moves
+            // take all moves from current location
+            Self::make_all_moves(all_moves);
 
-        todo!();
+            // check to see if the new current location is the target location
+            let new_current_cell = Self::get_current_location();
+            if new_current_cell == target_cell {
+                break;
+            }
+            start_cell = new_current_cell;
+        }
     }
 }
 
-// LocationAware implies breadth first search
-impl<T: LocationAware> Bfs for T {
-    type Cell = T::Cell;
-    type Move = T::Move;
-}
 
 
 #[cfg(test)]
