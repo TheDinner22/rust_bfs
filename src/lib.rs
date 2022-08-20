@@ -8,85 +8,73 @@
 
 use std::error::Error;
 
-pub trait PathAware {
+pub trait PathAware { //todo get shortest working path
     // cannot default impl this traits functions
 
     type Cell: PartialEq;
     type Move: PartialEq;
 
-    // also know as a path
+    // either a list of all possible moves (left, right, up, down, etc)...
+    // or know as a path
+    // todo: maybe the index should not be i32
     type CollectionOfMoves: PartialEq + IntoIterator<Item = Self::Move> + std::cmp::PartialOrd;
 
     fn get_paths(&self) -> Vec<&Self::CollectionOfMoves>;
     fn create_path(&mut self, path_to_create: Self::CollectionOfMoves);
-    fn remove_a_path(&mut self, path_to_remove: &Self::CollectionOfMoves);
+    fn remove_paths_by_index(&mut self, path_indexes: Vec<usize>); // should use get_paths to get list of
+                                                                   // possible paths to remove
     fn paths_intersect(&self, path_a: &Self::CollectionOfMoves, path_b: &Self::CollectionOfMoves) -> bool;
     fn path_back_tracks(&self, path_to_check: &Self::CollectionOfMoves) -> bool;
 
     fn check_and_trim_path(&mut self) {
         let all_paths = self.get_paths();
 
-        let mut paths_to_remove = vec![];
+        let mut path_ids_to_remove = vec![];
 
-        for path_a in all_paths {
+        for a_index in 0..all_paths.len() {
+            let path_a = &all_paths[a_index];
+
             // check if the path back tracks
             if self.path_back_tracks(path_a) {
-                paths_to_remove.push(path_a);
+                path_ids_to_remove.push(a_index);
                 continue;
             }
 
             // check if it intersects with any another path
-            for path_b in all_paths {
+            for b_index in 0..all_paths.len() {
+                let path_b = &all_paths[a_index];
+
                 if path_b == path_a {continue;}
 
                 if self.paths_intersect(path_a, path_b) {
                     if path_a > path_b {
-                        paths_to_remove.push(path_a)
+                        path_ids_to_remove.push(a_index)
                     }
                     else{
-                        paths_to_remove.push(path_b)
+                        path_ids_to_remove.push(b_index)
                     }
                 }
             } 
         }
 
-        for path in paths_to_remove {
-            self.remove_a_path(path);
-        }
+        self.remove_paths_by_index(path_ids_to_remove);
     }
 }
 
-pub trait LocationAware {
-    type Cell: PartialEq;
+// next you must fix this!!!
+pub trait LocationAware: PathAware {
+    const ALL_MOVES: Self::CollectionOfMoves;
 
-    type Move;
+    // fn project_move(&self, path: &Self::CollectionOfMoves, move_to_try: Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
 
-    type CollectionOfMoves: IntoIterator<Item = Self::Move>;
-
-
-    fn project_move(&self, path: &Self::CollectionOfMoves, mov: Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
-
-    fn make_all_moves_from_cell(&mut self, current_location: &Self::Cell, all_possible_moves: Self::CollectionOfMoves){
-        for possible_move in all_possible_moves {
-            let res_of_move = self.project_move(current_location, possible_move);
-
-            if let Ok(new_location) = res_of_move {
-
-            }
-            else {
-                // the move is illegal and can be ignored
-                continue;
-            }
-
-        }
-    }
-
-    fn get_shortest_working_path(&self) -> Self::CollectionOfMoves;
+    // fn create_paths_for_all_moves_from_cell(&mut self, path: &Self::CollectionOfMoves, all_possible_moves: Self::CollectionOfMoves){
+    //
+    // }
 }
 
 
 pub trait Bfs: LocationAware {
-    fn bfs(&mut self, start_cell: Self::Cell, target_cell: Self::Cell) {//-> Vec<Self::Move>{
+    fn bfs(&mut self, _start_cell: Self::Cell, _target_cell: Self::Cell) {//-> Vec<Self::Move>{
         todo!();
     }
 }
