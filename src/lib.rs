@@ -7,24 +7,30 @@
 //! todo!()
 
 pub trait LocationAware {
-    type Cell;
+    type Cell; // the smallest denominator of space
+    type Move; // a way to encode different moves (up down left right, maybe diagonal, etc)
 
-    fn get_current_location(){todo!()}
-
-    fn get_all_moves_from_current_location();
-    fn take_all_moves();
+    fn get_current_location() -> Self::Cell;
+    fn get_all_moves_from_current_location(current_location: Self::Cell) -> Vec<Self::Move>;
+    fn take_all_moves(all_possible_moves: Vec<Self::Move>);
     fn is_target_cell(cell_to_check: &Self::Cell) -> bool;
 }
 
 pub trait Bfs {
     type Cell;
+    type Move;
 
-    fn bfs(){}
+    fn bfs(&self, _start_cell: Self::Cell, _target_cell: Self::Cell) -> Vec<Self::Move>{
+        // get all of the moves
+
+        todo!();
+    }
 }
 
 // LocationAware implies breadth first search
 impl<T: LocationAware> Bfs for T {
     type Cell = T::Cell;
+    type Move = T::Move;
 }
 
 
