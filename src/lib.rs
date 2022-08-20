@@ -8,99 +8,86 @@
 
 use std::error::Error;
 
-/// # trait for types that represent space
-///
-/// I recommend these types be some kind of struct (see types functions' docs to understand why)
-///
-pub trait LocationAware {
-    /// # The smallest denominator of space
-    ///
-    /// The building block that makes up the space!
-    ///
-    /// ## examples
-    ///
-    /// blocks in minecraft, squares in chess, or i32 elements in a 1D array that represents a
-    /// tic-tac-toe board
-    ///
-    /// ## requirements
-    ///
-    /// Must implement the PartialEq trait. This is so I can check to see if Cell A is equal to
-    /// Cell B
+pub trait PathAware {
+    // cannot default impl this traits functions
+
     type Cell: PartialEq;
+    type Move: PartialEq;
 
-    /// # A way to encode different moves
-    ///
-    /// I recommend using an enum
-    ///
-    /// ## examples
-    ///
-    /// It depends on how many dimensions your space represents! Up, down, left, right, maybe diagonal, etc. 
-    type Move;
+    // also know as a path
+    type CollectionOfMoves: PartialEq + IntoIterator<Item = Self::Move> + std::cmp::PartialOrd;
 
-    /// # get all of the cells at the forefront of a breadth first search
-    ///
-    /// This is why I recommend implementing this trait on a struct! You are responsible for
-    /// somehow storing (and later updating) these values (probably as a property (of type Vec<Cell>) on the struct)
-    ///
-    /// # return type
-    ///
-    /// This function should return all of the cells at the forefront of a BFS. They can be
-    /// returned in no particular order. By "at the forefront," I mean Cells that, in the
-    /// next step of the BFS, are going to check for all possible moves around them (excluding the
-    /// move that was previously made, which is back-tracking and will never result in the most
-    /// efficent path).
-    fn get_current_locations(&self) -> Vec<&Self::Cell>;
+    fn get_paths(&self) -> Vec<&Self::CollectionOfMoves>;
+    fn create_path(&mut self, path_to_create: Self::CollectionOfMoves);
+    fn remove_a_path(&mut self, path_to_remove: &Self::CollectionOfMoves);
+    fn paths_intersect(&self, path_a: &Self::CollectionOfMoves, path_b: &Self::CollectionOfMoves) -> bool;
+    fn path_back_tracks(&self, path_to_check: &Self::CollectionOfMoves) -> bool;
 
-    /// # try to do every possible move from a provided location and return only the possible moves
-    ///
-    /// Whether or not a move is possible is up to you! Maybe you are coding a maze and the player
-    /// should not be able to move through walls. This function is where you implement that logic!
-    /// ***This function should not actually move anything***
-    ///
-    /// ## return type
-    ///
-    /// The function returns a list of possible moves in no particular order.
-    fn get_all_moves_from_current_location(&self, current_location: &Self::Cell) -> Vec<Self::Move>;
+    fn check_and_trim_path(&mut self) {
+        let all_paths = self.get_paths();
 
-    /// # attempt a move
-    ///
-    /// Try and move from one cell to another with one of the previously defined moves on the Move
-    /// type. Again whether a move is "legal" or not is up to you!
-    /// ***This is the only function that actually moves cells***
-    ///
-    /// ## return type
-    ///
-    /// This function returns a result of an OK Cell (where the current_cell ended up) or an Err std::error::Error trait object.
-    /// 
-    fn do_move(&mut self, current_location: &Self::Cell, mov: Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
+        let mut paths_to_remove = vec![];
 
-    /// # 
-    fn make_all_moves(all_possible_moves: Vec<Self::Move>);
-    fn is_target_cell(cell_to_check: &Self::Cell) -> bool;
-    fn generate_path_from_move_history(&self) -> Vec<Self::Move>;
+        for path_a in all_paths {
+            // check if the path back tracks
+            if self.path_back_tracks(path_a) {
+                paths_to_remove.push(path_a);
+                continue;
+            }
+
+            // check if it intersects with any another path
+            for path_b in all_paths {
+                if path_b == path_a {continue;}
+
+                if self.paths_intersect(path_a, path_b) {
+                    if path_a > path_b {
+                        paths_to_remove.push(path_a)
+                    }
+                    else{
+                        paths_to_remove.push(path_b)
+                    }
+                }
+            } 
+        }
+
+        for path in paths_to_remove {
+            self.remove_a_path(path);
+        }
+    }
 }
 
-pub trait Bfs: LocationAware {
-    fn bfs(&self, target_cell: Self::Cell) -> Vec<Self::Move>{
-        loop {
-            // get current get_current_locations
-            let current_cells = self.get_current_locations();
+pub trait LocationAware {
+    type Cell: PartialEq;
 
-            // loop over all of them, making all possible moves at each step
-            for current_cell in current_cells {
-                // check to see if any of the current locations is the target location
-                if current_cell == &target_cell {
-                    self.generate_path_from_move_history()
-                }
-                else{continue;};
+    type Move;
 
-                // get all the moves allowed from this location
-                let all_moves = self.get_all_moves_from_current_location(current_cell);
+    type CollectionOfMoves: IntoIterator<Item = Self::Move>;
 
-                // take all moves from current location
-                Self::make_all_moves(all_moves);
+
+    fn project_move(&self, path: &Self::CollectionOfMoves, mov: Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
+
+    fn make_all_moves_from_cell(&mut self, current_location: &Self::Cell, all_possible_moves: Self::CollectionOfMoves){
+        for possible_move in all_possible_moves {
+            let res_of_move = self.project_move(current_location, possible_move);
+
+            if let Ok(new_location) = res_of_move {
+
             }
+            else {
+                // the move is illegal and can be ignored
+                continue;
+            }
+
         }
+    }
+
+    fn get_shortest_working_path(&self) -> Self::CollectionOfMoves;
+}
+
+
+pub trait Bfs: LocationAware {
+    fn bfs(&mut self, start_cell: Self::Cell, target_cell: Self::Cell) {//-> Vec<Self::Move>{
+        todo!();
     }
 }
 
@@ -130,5 +117,9 @@ mod tests {
 // until reaching some specified location the path to that location is the path of "least
 // resistance" and is returned or something
 //
+// i have realized that there are some things about bfs i can assert! For example there must be
+// paths that are vec<Move>. A path can only ever contain a cell once (they are sets no vecs). If
+// two paths cross, the larger one is invalid
+// i need to implement behavior for paths 
 //
 //
