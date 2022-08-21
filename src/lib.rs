@@ -17,44 +17,33 @@ pub trait PathAware { //todo get shortest working path
     // either a list of all possible moves (left, right, up, down, etc)...
     // or know as a path
     // todo: maybe the index should not be i32
-    type CollectionOfMoves: Clone + PartialEq + IntoIterator<Item = Self::Move> + std::cmp::PartialOrd;
+    type CollectionOfMoves: PartialEq + IntoIterator<Item = Self::Move> + std::cmp::PartialOrd;
 
     fn get_paths(&self) -> &Vec<Self::CollectionOfMoves>;
     fn create_path_from_move(&mut self, first_move: Self::Move);
-    fn remove_paths_by_index(&mut self, path_indexes: Vec<usize>); // should use get_paths to get list of
-                                                                   // possible paths to remove
-    fn paths_intersect(&self, path_a: &Self::CollectionOfMoves, path_b: &Self::CollectionOfMoves) -> bool;
-    fn path_back_tracks(&self, path_to_check: &Self::CollectionOfMoves) -> bool;
+    fn remove_path_by_index(&mut self, index_to_remove: usize);
+
+
+    fn path_back_tracks(&self, _index_of_path_to_check: usize) -> bool {
+        todo!();
+    }
+
+    fn remove_paths_by_index(&mut self, path_indexes: Vec<usize>) {
+        for (items_removed_so_far, index_to_remove) in path_indexes.iter().enumerate() {
+            self.remove_path_by_index(index_to_remove - items_removed_so_far);
+        }
+    }
 
     fn check_and_trim_path(&mut self) {
         let all_paths = self.get_paths();
 
         let mut path_ids_to_remove = vec![];
 
-        for a_index in 0..all_paths.len() {
-            let path_a = &all_paths[a_index];
-
+        for (path_index, _) in all_paths.iter().enumerate() {
             // check if the path back tracks
-            if self.path_back_tracks(path_a) {
-                path_ids_to_remove.push(a_index);
-                continue;
+            if self.path_back_tracks(path_index) {
+                path_ids_to_remove.push(path_index);
             }
-
-            // check if it intersects with any another path
-            for b_index in 0..all_paths.len() {
-                let path_b = &all_paths[a_index];
-
-                if path_b == path_a {continue;}
-
-                if self.paths_intersect(path_a, path_b) {
-                    if path_a > path_b {
-                        path_ids_to_remove.push(a_index)
-                    }
-                    else{
-                        path_ids_to_remove.push(b_index)
-                    }
-                }
-            } 
         }
 
         self.remove_paths_by_index(path_ids_to_remove);

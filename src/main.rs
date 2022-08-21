@@ -6,14 +6,56 @@ struct TicTacToeBoard {
     squares: Vec<Square>,
 }
 
+impl TicTacToeBoard {
+    fn set_square_state(&mut self, square_id: i32, new_state: SquareContent) {
+        let square_to_change = &mut self.squares[square_id as usize];
+
+        square_to_change.state = new_state;
+    }
+}
+
+impl Default for TicTacToeBoard {
+    fn default() -> Self {
+        TicTacToeBoard {
+            paths: vec![],
+            squares: vec![
+                Square::new(0),
+                Square::new(1),
+                Square::new(2),
+                Square::new(3),
+                Square::new(4),
+                Square::new(5),
+                Square::new(6),
+                Square::new(7),
+                Square::new(8),
+            ],
+        }
+    }
+}
+
 #[derive(PartialEq)]
-enum Square {
+enum SquareContent {
     X,
     O,
     Empty,
 }
 
-#[derive(PartialEq, PartialOrd, Clone)]
+#[derive(PartialEq)]
+struct Square {
+    state: SquareContent,
+    id: i32,
+}
+
+impl Square {
+    fn new(id: i32) -> Self {
+        Square {
+            state: SquareContent::Empty,
+            id,
+        }
+    }
+}
+
+#[derive(PartialEq, PartialOrd)]
 enum Moves {
     Up,
     Down,
@@ -36,22 +78,16 @@ impl PathAware for TicTacToeBoard {
         self.paths.push(vec![first_move]);
     }
 
-    fn remove_paths_by_index(&mut self, path_indexes: Vec<usize>) {
-        for (items_removed_so_far, index_to_remove) in path_indexes.iter().enumerate() {
-            self.paths.remove(index_to_remove - items_removed_so_far);
-        }
+    fn remove_path_by_index(&mut self, index_to_remove: usize) {
+        self.paths.remove(index_to_remove);
     }
-
-    fn paths_intersect(&self, path_a: &Self::CollectionOfMoves, path_b: &Self::CollectionOfMoves) -> bool {
-        todo!()
-    }
-
-    fn path_back_tracks(&self, path_to_check: &Self::CollectionOfMoves) -> bool {
-        todo!()
-    }
-
 }
 
 fn main(){
+    let mut board = TicTacToeBoard::default();
+
+    board.set_square_state(0, SquareContent::X);
+    board.set_square_state(1, SquareContent::O);
+    board.set_square_state(8, SquareContent::X);
 
 }
