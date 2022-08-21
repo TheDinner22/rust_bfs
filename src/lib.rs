@@ -7,7 +7,6 @@
 //! todo!()
 
 use std::error::Error;
-use std::cmp::PartialOrd;
 
 pub struct Path<Cell, Move>
 where
@@ -15,7 +14,7 @@ where
     Move: PartialEq,
 {
     start_location: Cell,
-    path_taken: Vec<Move>
+    path_taken: Vec<Move>,
 }
 
 impl<Cell, Move> Path<Cell, Move>
@@ -43,12 +42,7 @@ pub trait PathAware { //todo get shortest working path
     type Cell: PartialEq;
     type Move: PartialEq;
 
-    // either a list of all possible moves (left, right, up, down, etc)...
-    // or know as a path
-    // todo: maybe the index should not be i32
-    type CollectionOfMoves: PartialEq + PartialOrd;
-
-    fn get_paths(&self) -> &Vec<Path<Self::Cell, Self::CollectionOfMoves>>;
+    fn get_paths(&self) -> &Vec<Path<Self::Cell, Self::Move>>;
     fn create_path(&mut self, start_cell: Self::Cell, first_move: Option<Self::Move>);
     fn remove_path_by_index(&mut self, index_to_remove: usize);
 
@@ -56,7 +50,7 @@ pub trait PathAware { //todo get shortest working path
         todo!();
     }
 
-    fn get_path_from_index(&self, index: usize) -> &Path<Self::Cell, Self::CollectionOfMoves> {
+    fn get_path_from_index(&self, index: usize) -> &Path<Self::Cell, Self::Move> {
         let all_paths = self.get_paths();
 
         if index >= all_paths.len() { panic!("index that was passed to get_path_from_index was out of range") }
@@ -88,22 +82,30 @@ pub trait PathAware { //todo get shortest working path
 
 // next you must fix this!!!
 pub trait LocationAware: PathAware {
-    const ALL_MOVES: Self::CollectionOfMoves;
+    const ALL_MOVES: [Self::Move];
 
-    fn project_move(&self, start_cell: Self::Cell, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
+    fn project_move(&self, start_cell: &Self::Cell, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
 
-    fn get_paths_last_cell(&self, path_index: usize){ //-> Self::Cell {
+    fn get_a_paths_last_cell(&self, path_index: usize) -> &Self::Cell {
         let path = self.get_path_from_index(path_index);
-        let paths_last_cell = ;
+        // this will end up being the last cell
+        let mut current_cell: &Self::Cell = &path.start_location;
+
+
+        for move_taken in path.path_taken.iter() {
+            let next_cell = self.project_move(current_cell, move_taken).expect("The value returned from project to be the Ok varient becuase this is a move that WAS MADE");
+            current_cell = next_cell;
+        }
+
+        current_cell
     }
 
     fn advance_all_paths(&mut self) {
         // get all paths and loop over them
         let all_paths = self.get_paths();
 
-        for path in all_paths {
-
-
+        for _path in all_paths {
+            todo!()
         }
     }
 }
