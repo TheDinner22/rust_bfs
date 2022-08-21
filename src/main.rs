@@ -68,14 +68,12 @@ impl PathAware for TicTacToeBoard {
 
     type Move = Moves;
 
-    type CollectionOfMoves = Vec<Moves>;
-
-    fn get_paths(&self) -> &Vec<Path<Self::Cell, Self::CollectionOfMoves>> {
+    fn get_paths(&self) -> &Vec<Path<Self::Cell, Self::Move>> {
         &self.paths
     }
 
-    fn create_path_from_move(&mut self, start_cell: Self::Cell, first_move: Option<Self::Move>) {
-        self.paths.push( Path::new(start_location, first_move) );
+    fn create_path(&mut self, start_cell: Self::Cell, first_move: Option<Self::Move>) {
+        self.paths.push( Path::new(start_cell, first_move) );
     }
 
     fn remove_path_by_index(&mut self, index_to_remove: usize) {
