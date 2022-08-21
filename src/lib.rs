@@ -7,6 +7,35 @@
 //! todo!()
 
 use std::error::Error;
+use std::cmp::PartialOrd;
+
+pub struct Path<Cell, Move>
+where
+    Cell: PartialEq,
+    Move: PartialEq,
+{
+    start_location: Cell,
+    path_taken: Vec<Move>
+}
+
+impl<Cell, Move> Path<Cell, Move>
+where
+    Cell: PartialEq,
+    Move: PartialEq,
+{
+    pub fn new(start_location: Cell, first_move: Option<Move>) -> Self {
+        let mut path_taken = Vec::new();
+
+        if let Some(mov) = first_move {
+            path_taken.push(mov);
+        }
+
+        Path {
+            start_location,
+            path_taken,
+        }
+    }
+}
 
 pub trait PathAware { //todo get shortest working path
     // cannot default impl this traits functions
@@ -17,15 +46,22 @@ pub trait PathAware { //todo get shortest working path
     // either a list of all possible moves (left, right, up, down, etc)...
     // or know as a path
     // todo: maybe the index should not be i32
-    type CollectionOfMoves: PartialEq + IntoIterator<Item = Self::Move> + std::cmp::PartialOrd;
+    type CollectionOfMoves: PartialEq + PartialOrd;
 
-    fn get_paths(&self) -> &Vec<Self::CollectionOfMoves>;
-    fn create_path_from_move(&mut self, first_move: Self::Move);
+    fn get_paths(&self) -> &Vec<Path<Self::Cell, Self::CollectionOfMoves>>;
+    fn create_path(&mut self, start_cell: Self::Cell, first_move: Option<Self::Move>);
     fn remove_path_by_index(&mut self, index_to_remove: usize);
-
 
     fn path_back_tracks(&self, _index_of_path_to_check: usize) -> bool {
         todo!();
+    }
+
+    fn get_path_from_index(&self, index: usize) -> &Path<Self::Cell, Self::CollectionOfMoves> {
+        let all_paths = self.get_paths();
+
+        if index >= all_paths.len() { panic!("index that was passed to get_path_from_index was out of range") }
+
+        &all_paths[index]
     }
 
     fn remove_paths_by_index(&mut self, path_indexes: Vec<usize>) {
@@ -34,12 +70,12 @@ pub trait PathAware { //todo get shortest working path
         }
     }
 
-    fn check_and_trim_path(&mut self) {
+    fn check_and_trim_paths(&mut self) {
         let all_paths = self.get_paths();
 
         let mut path_ids_to_remove = vec![];
 
-        for (path_index, _) in all_paths.iter().enumerate() {
+        for path_index in 0..all_paths.len() {
             // check if the path back tracks
             if self.path_back_tracks(path_index) {
                 path_ids_to_remove.push(path_index);
@@ -54,17 +90,20 @@ pub trait PathAware { //todo get shortest working path
 pub trait LocationAware: PathAware {
     const ALL_MOVES: Self::CollectionOfMoves;
 
-    fn project_move(&self, path: &Self::CollectionOfMoves, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
+    fn project_move(&self, start_cell: Self::Cell, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
 
-    fn create_new_paths_for_all_moves_from_path(&mut self, path: &Self::CollectionOfMoves){
-        for possible_move in Self::ALL_MOVES {
-            let res_of_move = self.project_move(path, &possible_move);
+    fn get_paths_last_cell(&self, path_index: usize){ //-> Self::Cell {
+        let path = self.get_path_from_index(path_index);
+        let paths_last_cell = ;
+    }
 
-            if let Ok(_new_location) = res_of_move {
-                // create new path with possible_move appended
-                // let _new_path = &(*path).clone();
-                todo!()
-            }
+    fn advance_all_paths(&mut self) {
+        // get all paths and loop over them
+        let all_paths = self.get_paths();
+
+        for path in all_paths {
+
+
         }
     }
 }
