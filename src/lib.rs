@@ -6,7 +6,7 @@
 //!
 //! todo!()
 
-use std::error::Error;
+use std::{error::Error, slice::Iter};
 
 pub struct Path<Cell, Move>
 where
@@ -22,6 +22,7 @@ where
     Cell: PartialEq,
     Move: PartialEq,
 {
+    // create a new path
     pub fn new(start_location: Cell, first_move: Option<Move>) -> Self {
         let mut path_taken = Vec::new();
 
@@ -34,11 +35,14 @@ where
             path_taken,
         }
     }
+
+    // grab iterator of vector in the path struct
+    fn iter(&self) -> Iter<Move> {
+        self.path_taken.iter()
+    }
 }
 
 pub trait PathAware { //todo get shortest working path
-    // cannot default impl this traits functions
-
     type Cell: PartialEq;
     type Move: PartialEq;
 
@@ -46,8 +50,10 @@ pub trait PathAware { //todo get shortest working path
     fn create_path(&mut self, start_cell: Self::Cell, first_move: Option<Self::Move>);
     fn remove_path_by_index(&mut self, index_to_remove: usize);
 
-    fn path_back_tracks(&self, _index_of_path_to_check: usize) -> bool {
-        todo!();
+    fn path_back_tracks(&self, index_of_path_to_check: usize) -> bool {
+        let _path = self.get_path_from_index(index_of_path_to_check);
+
+        todo!(); // need to create a (get cells that compose path function)
     }
 
     fn get_path_from_index(&self, index: usize) -> &Path<Self::Cell, Self::Move> {
@@ -88,16 +94,31 @@ pub trait LocationAware: PathAware {
 
     fn get_a_paths_last_cell(&self, path_index: usize) -> &Self::Cell {
         let path = self.get_path_from_index(path_index);
+
         // this will end up being the last cell
         let mut current_cell: &Self::Cell = &path.start_location;
 
 
-        for move_taken in path.path_taken.iter() {
+        for move_taken in path.iter() {
             let next_cell = self.project_move(current_cell, move_taken).expect("The value returned from project to be the Ok varient becuase this is a move that WAS MADE");
             current_cell = next_cell;
         }
 
         current_cell
+    }
+
+    fn get_cells_traversed_in_path(&self, index_of_path: usize) -> Vec<&Self::Cell>{
+        let path = self.get_path_from_index(index_of_path);
+        let mut cells_in_path = vec![&path.start_location];
+
+        for (i, move_made) in path.iter().enumerate() {
+            cells_in_path.push(
+                    self.project_move(cells_in_path[i], move_made)
+                        .expect("The value returned from project to be the Ok varient becuase this is a move that WAS MADE")
+                );
+        }
+
+        cells_in_path
     }
 
     fn advance_all_paths(&mut self) {
