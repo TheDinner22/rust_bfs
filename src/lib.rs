@@ -49,18 +49,16 @@ pub trait PathAware<'a> { //todo get shortest working path
     type Cell: PartialEq;
     type Move: PartialEq + Copy;
 
-    fn get_paths(&self) -> &Vec<Path<Self::Cell, Self::Move>>;
+    fn get_paths(&'a self) -> &'a Vec<Path<Self::Cell, Self::Move>>;
     fn create_path(&mut self, start_cell: &'a Self::Cell, moves: Option<Vec<Self::Move>>);
     fn set_paths(&mut self, new_paths: Vec<Path<'a, Self::Cell, Self::Move>>); // truncates old paths
     fn remove_path_by_index(&mut self, index_to_remove: usize);
 
-    fn path_back_tracks(&self, index_of_path_to_check: usize) -> bool {
-        let _path = self.get_path_from_index(index_of_path_to_check);
-
+    fn path_back_tracks(&self, _index_of_path_to_check: usize) -> bool {
         todo!(); // need to create a (get cells that compose path function)
     }
 
-    fn get_path_from_index(&self, index: usize) -> &Path<Self::Cell, Self::Move> {
+    fn get_path_from_index(&'a self, index: usize) -> &'a Path<Self::Cell, Self::Move> {
         let all_paths = self.get_paths();
 
         if index >= all_paths.len() { panic!("index that was passed to get_path_from_index was out of range") }
@@ -74,11 +72,10 @@ pub trait PathAware<'a> { //todo get shortest working path
         }
     }
 
-    fn check_and_trim_paths(&mut self) {
-        let all_paths = self.get_paths();
-
+    fn check_and_trim_paths(&'a mut self) {
         let mut path_ids_to_remove = vec![];
 
+        let all_paths = self.get_paths();
         for path_index in 0..all_paths.len() {
             // check if the path back tracks
             if self.path_back_tracks(path_index) {
@@ -89,16 +86,15 @@ pub trait PathAware<'a> { //todo get shortest working path
         self.remove_paths_by_index(path_ids_to_remove);
     }
 }
-/*
 // next you must fix this!!!
-pub trait LocationAware: PathAware {
+pub trait LocationAware<'a>: PathAware<'a> {
     const ALL_MOVES: [Self::Move];
 
     fn project_move(&self, start_cell: &Self::Cell, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
 
-    fn get_cells_traversed_in_path(&self, index_of_path: usize) -> Vec<&Self::Cell>{
+    fn get_cells_traversed_in_path(&'a self, index_of_path: usize) -> Vec<&Self::Cell>{
         let path = self.get_path_from_index(index_of_path);
-        let mut cells_in_path = vec![&path.start_location];
+        let mut cells_in_path = vec![path.start_location];
 
         for (i, move_made) in path.iter().enumerate() {
             cells_in_path.push(
@@ -110,13 +106,13 @@ pub trait LocationAware: PathAware {
         cells_in_path
     }
 
-    fn get_a_paths_last_cell(&self, path_index: usize) -> &Self::Cell {
+    fn get_a_paths_last_cell(&'a self, path_index: usize) -> &Self::Cell {
         self.get_cells_traversed_in_path(path_index)
             .pop()
             .expect("the path to have at least one cell in it (the starting cell)")
     }
 
-    fn advance_and_split_all_paths(&mut self) {
+    /*fn advance_and_split_all_paths(&mut self) {
         // get all paths and loop over them
         let all_paths = self.get_paths();
 
@@ -134,17 +130,8 @@ pub trait LocationAware: PathAware {
             }
             todo!()
         }
-    }
+    }*/
 }
-
-
-pub trait Bfs: LocationAware {
-    fn bfs(&mut self, _start_cell: Self::Cell, _target_cell: Self::Cell) {
-        todo!();
-    }
-}
-
-
 
 #[cfg(test)]
 mod tests {
@@ -156,7 +143,6 @@ mod tests {
         }
     }
 }
-*/
 // some ideas and sudo code
 //
 // need an array or array like struct or something (must somehow, loose-ly represent some space, 2d, 3d, etc.)
