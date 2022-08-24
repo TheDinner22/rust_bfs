@@ -92,21 +92,6 @@ pub trait LocationAware: PathAware {
 
     fn project_move(&self, start_cell: &Self::Cell, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
 
-    fn get_a_paths_last_cell(&self, path_index: usize) -> &Self::Cell {
-        let path = self.get_path_from_index(path_index);
-
-        // this will end up being the last cell
-        let mut current_cell: &Self::Cell = &path.start_location;
-
-
-        for move_taken in path.iter() {
-            let next_cell = self.project_move(current_cell, move_taken).expect("The value returned from project to be the Ok varient becuase this is a move that WAS MADE");
-            current_cell = next_cell;
-        }
-
-        current_cell
-    }
-
     fn get_cells_traversed_in_path(&self, index_of_path: usize) -> Vec<&Self::Cell>{
         let path = self.get_path_from_index(index_of_path);
         let mut cells_in_path = vec![&path.start_location];
@@ -119,6 +104,12 @@ pub trait LocationAware: PathAware {
         }
 
         cells_in_path
+    }
+
+    fn get_a_paths_last_cell(&self, path_index: usize) -> &Self::Cell {
+        self.get_cells_traversed_in_path(path_index)
+            .pop()
+            .expect("the path to have at least one cell in it (the starting cell)")
     }
 
     fn advance_all_paths(&mut self) {
