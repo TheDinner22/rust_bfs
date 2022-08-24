@@ -85,6 +85,75 @@ impl<'a> PathAware<'a> for TicTacToeBoard<'a> {
     }
 }
 
+#[derive(Debug)]
+struct MoveError {
+    error_msg: String,
+}
+
+impl MoveError {
+    fn new (error_msg: &str) -> Self {
+        MoveError {
+            error_msg: error_msg.to_string()
+        }
+    }
+
+    fn boxed_new (error_msg: &str) -> Box<Self> {
+        Box::new(MoveError::new(error_msg))
+    }
+}
+
+impl std::fmt::Display for MoveError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.error_msg)
+    }
+}
+
+impl std::error::Error for MoveError {}
+
+impl<'a> LocationAware<'a> for TicTacToeBoard<'a> {
+    fn project_move(&self, start_cell: &Self::Cell, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn std::error::Error>> {
+        let index = start_cell.id;
+        match move_to_try {
+            Moves::Up => {
+                if index > 2 {
+                    Ok(&(self.squares[(index - 3) as usize]))
+                }
+                else {
+                    Err(MoveError::boxed_new("Cannot move up!"))
+                }
+            },
+            Moves::Down => {
+                if index < 6 {
+                    Ok(&(self.squares[(index + 3) as usize]))
+                }
+                else {
+                    Err(MoveError::boxed_new("Cannot move down!"))
+                }
+            },
+            Moves::Left => {
+                if index % 3 != 0 {
+                    Ok(&(self.squares[(index - 1) as usize]))
+                }
+                else {
+                    Err(MoveError::boxed_new("Cannot move Left!"))
+                }
+            },
+            Moves::Right => {
+                if (index+1) % 3 != 0 {
+                    Ok(&(self.squares[(index + 1) as usize]))
+                }
+                else {
+                    Err(MoveError::boxed_new("Cannot move Right!"))
+                }
+            },
+        }
+    }
+
+    fn list_all_moves(&self) -> Vec<Self::Move> {
+        vec![Moves::Up, Moves::Down, Moves::Left, Moves::Right]
+    }
+}
+
 fn main(){
     let mut board = TicTacToeBoard::default();
 
