@@ -8,26 +8,29 @@
 
 use std::{error::Error, slice::Iter};
 
-pub struct Path<Cell, Move>
+pub struct Path<'a, Cell, Move>
 where
     Cell: PartialEq,
-    Move: PartialEq,
+    Move: PartialEq + Copy,
 {
-    start_location: Cell,
+    start_location: &'a Cell,
     path_taken: Vec<Move>,
 }
 
-impl<Cell, Move> Path<Cell, Move>
+impl<'a, Cell, Move> Path<'a, Cell, Move>
 where
     Cell: PartialEq,
-    Move: PartialEq,
+    Move: PartialEq + Copy,
 {
     // create a new path
-    pub fn new(start_location: Cell, first_move: Option<Move>) -> Self {
-        let mut path_taken = Vec::new();
+    pub fn new(start_location: &'a Cell, moves: Option<Vec<Move>>) -> Self {
+        let path_taken;
 
-        if let Some(mov) = first_move {
-            path_taken.push(mov);
+        if let Some(mov) = moves {
+            path_taken = mov;
+        }
+        else {
+            path_taken = Vec::new();
         }
 
         Path {
@@ -42,12 +45,13 @@ where
     }
 }
 
-pub trait PathAware { //todo get shortest working path
+pub trait PathAware<'a> { //todo get shortest working path
     type Cell: PartialEq;
-    type Move: PartialEq;
+    type Move: PartialEq + Copy;
 
     fn get_paths(&self) -> &Vec<Path<Self::Cell, Self::Move>>;
-    fn create_path(&mut self, start_cell: Self::Cell, first_move: Option<Self::Move>);
+    fn create_path(&mut self, start_cell: &'a Self::Cell, moves: Option<Vec<Self::Move>>);
+    fn set_paths(&mut self, new_paths: Vec<Path<'a, Self::Cell, Self::Move>>); // truncates old paths
     fn remove_path_by_index(&mut self, index_to_remove: usize);
 
     fn path_back_tracks(&self, index_of_path_to_check: usize) -> bool {
@@ -85,7 +89,7 @@ pub trait PathAware { //todo get shortest working path
         self.remove_paths_by_index(path_ids_to_remove);
     }
 }
-
+/*
 // next you must fix this!!!
 pub trait LocationAware: PathAware {
     const ALL_MOVES: [Self::Move];
@@ -112,11 +116,22 @@ pub trait LocationAware: PathAware {
             .expect("the path to have at least one cell in it (the starting cell)")
     }
 
-    fn advance_all_paths(&mut self) {
+    fn advance_and_split_all_paths(&mut self) {
         // get all paths and loop over them
         let all_paths = self.get_paths();
 
-        for _path in all_paths {
+        let mut new_paths = Vec::new();
+        for (path_index, path) in all_paths.iter().enumerate() {
+            // get last cell
+            let last_cell = self.get_a_paths_last_cell(path_index);
+            
+            // project new cell from all possible moves
+            let new_last_cells = Vec::new();
+            for possible_move in &Self::ALL_MOVES {
+                if let Ok(new_location) = self.project_move(last_cell, possible_move) {
+                    new_last_cells.push(new_location);
+                }
+            }
             todo!()
         }
     }
@@ -141,7 +156,7 @@ mod tests {
         }
     }
 }
-
+*/
 // some ideas and sudo code
 //
 // need an array or array like struct or something (must somehow, loose-ly represent some space, 2d, 3d, etc.)

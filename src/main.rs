@@ -1,12 +1,12 @@
 // this is for testing only making sure remote works
 use rust_bfs::*;
 
-struct TicTacToeBoard {
-    paths: Vec<Path<Square, Moves>>,
+struct TicTacToeBoard<'a> {
+    paths: Vec<Path<'a, Square, Moves>>,
     squares: Vec<Square>,
 }
 
-impl TicTacToeBoard {
+impl TicTacToeBoard<'_> {
     fn set_square_state(&mut self, square_id: i32, new_state: SquareContent) {
         let square_to_change = &mut self.squares[square_id as usize];
 
@@ -14,7 +14,7 @@ impl TicTacToeBoard {
     }
 }
 
-impl Default for TicTacToeBoard {
+impl Default for TicTacToeBoard<'_> {
     fn default() -> Self {
         TicTacToeBoard {
             paths: vec![],
@@ -55,7 +55,7 @@ impl Square {
     }
 }
 
-#[derive(PartialEq, PartialOrd)]
+#[derive(PartialEq, Clone, Copy)]
 enum Moves {
     Up,
     Down,
@@ -63,7 +63,7 @@ enum Moves {
     Right,
 }
 
-impl PathAware for TicTacToeBoard {
+impl<'a> PathAware<'a> for TicTacToeBoard<'a> {
     type Cell = Square;
 
     type Move = Moves;
@@ -72,8 +72,12 @@ impl PathAware for TicTacToeBoard {
         &self.paths
     }
 
-    fn create_path(&mut self, start_cell: Self::Cell, first_move: Option<Self::Move>) {
-        self.paths.push( Path::new(start_cell, first_move) );
+    fn create_path(&mut self, start_cell: &'a Self::Cell, moves: Option<Vec<Self::Move>>) {
+        self.paths.push( Path::new(start_cell, moves) )
+    }
+
+    fn set_paths(&mut self, new_paths: Vec<Path<'a, Self::Cell, Self::Move>>) {
+        self.paths = new_paths;
     }
 
     fn remove_path_by_index(&mut self, index_to_remove: usize) {
