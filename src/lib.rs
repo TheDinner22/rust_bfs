@@ -88,8 +88,7 @@ pub trait PathAware<'a> { //todo get shortest working path
 }
 // next you must fix this!!!
 pub trait LocationAware<'a>: PathAware<'a> {
-    const ALL_MOVES: [Self::Move];
-
+    fn list_all_moves(&self) -> Vec<Self::Move>;
     fn project_move(&self, start_cell: &Self::Cell, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
 
     fn get_cells_traversed_in_path(&'a self, index_of_path: usize) -> Vec<&Self::Cell>{
@@ -112,25 +111,7 @@ pub trait LocationAware<'a>: PathAware<'a> {
             .expect("the path to have at least one cell in it (the starting cell)")
     }
 
-    /*fn advance_and_split_all_paths(&mut self) {
-        // get all paths and loop over them
-        let all_paths = self.get_paths();
-
-        let mut new_paths = Vec::new();
-        for (path_index, path) in all_paths.iter().enumerate() {
-            // get last cell
-            let last_cell = self.get_a_paths_last_cell(path_index);
-            
-            // project new cell from all possible moves
-            let new_last_cells = Vec::new();
-            for possible_move in &Self::ALL_MOVES {
-                if let Ok(new_location) = self.project_move(last_cell, possible_move) {
-                    new_last_cells.push(new_location);
-                }
-            }
-            todo!()
-        }
-    }*/
+    fn advance_and_split_all_paths(&mut self) {todo!()}
 }
 
 #[cfg(test)]
