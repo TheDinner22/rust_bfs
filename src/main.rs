@@ -1,4 +1,3 @@
-/*
 // this is for testing only making sure remote works
 use rust_bfs::*;
 
@@ -69,7 +68,7 @@ impl<'a> PathAware<'a> for TicTacToeBoard<'a> {
 
     type Move = Moves;
 
-    fn get_paths(&self) -> &Vec<Path<Self::Cell, Self::Move>> {
+    fn get_paths<'b>(&self) -> &'b Vec<Path<Self::Cell, Self::Move>> {
         &self.paths
     }
 
@@ -163,5 +162,3 @@ fn main(){
     board.set_square_state(8, SquareContent::X);
 
 }
-*/
-fn main(){ }

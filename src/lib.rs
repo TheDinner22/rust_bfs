@@ -49,7 +49,7 @@ pub trait PathAware<'a> { //todo get shortest working path
     type Cell: PartialEq;
     type Move: PartialEq + Copy;
 
-    fn get_paths(&'a self) -> &'a Vec<Path<Self::Cell, Self::Move>>;
+    fn get_paths<'b>(&self) -> &'b Vec<Path<Self::Cell, Self::Move>>;
     fn create_path(&mut self, start_cell: &'a Self::Cell, moves: Option<Vec<Self::Move>>);
     fn set_paths(&mut self, new_paths: Vec<Path<'a, Self::Cell, Self::Move>>); // truncates old paths
     fn remove_path_by_index(&mut self, index_to_remove: usize);
@@ -87,7 +87,6 @@ pub trait PathAware<'a> { //todo get shortest working path
     }
 }
 // next you must fix this!!!
-/*
 pub trait LocationAware<'a>: PathAware<'a> {
     fn list_all_moves(&self) -> Vec<Self::Move>;
     fn project_move(&self, start_cell: &Self::Cell, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
@@ -114,7 +113,6 @@ pub trait LocationAware<'a>: PathAware<'a> {
 
     fn advance_and_split_all_paths(&mut self) {todo!()}
 }
-*/
 
 #[cfg(test)]
 mod tests {
