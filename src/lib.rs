@@ -91,30 +91,14 @@ pub trait LocationAware<'a>: PathAware<'a> {
     fn list_all_moves(&self) -> Vec<Self::Move>;
     fn project_move(&self, start_cell: &Self::Cell, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
 
-    fn get_cells_one_move_from_cell(&self, cell: &Self::Cell) -> Vec<&Self::Move> {
-        let moves = self.list_all_moves();
-
-        todo!()
-        /*
-        moves
+    fn get_cells_one_move_from_cell(&self, cell: &Self::Cell) -> Vec<&Self::Cell> {
+        self.list_all_moves()
             .iter()
-            .filter(|m| {
-                if let Ok(cell) = self.project_move(cell, m) { true }
-                else { false }
+            .filter_map(|possible_move| {
+                self.project_move(cell, possible_move)
+                    .ok()
             })
-        .collect()
-        */
-
-
-        // solution that does not use iterator (needs mut v: Vec<_>)
-        // for possible_move in moves {
-        //     if let Ok(new_cell) = self.project_move(cell, &possible_move)
-        //     {
-        //         v.push(new_cell);
-        //     }
-        // }
-
-        // v
+            .collect()
     }
 
     fn get_cells_traversed_in_path(&'a self, index_of_path: usize) -> Vec<&Self::Cell>{
