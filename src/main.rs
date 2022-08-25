@@ -1,3 +1,4 @@
+/*
 // this is for testing only making sure remote works
 use rust_bfs::*;
 
@@ -162,3 +163,5 @@ fn main(){
     board.set_square_state(8, SquareContent::X);
 
 }
+*/
+fn main(){ }

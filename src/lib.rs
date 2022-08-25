@@ -87,6 +87,7 @@ pub trait PathAware<'a> { //todo get shortest working path
     }
 }
 // next you must fix this!!!
+/*
 pub trait LocationAware<'a>: PathAware<'a> {
     fn list_all_moves(&self) -> Vec<Self::Move>;
     fn project_move(&self, start_cell: &Self::Cell, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
@@ -113,6 +114,7 @@ pub trait LocationAware<'a>: PathAware<'a> {
 
     fn advance_and_split_all_paths(&mut self) {todo!()}
 }
+*/
 
 #[cfg(test)]
 mod tests {
