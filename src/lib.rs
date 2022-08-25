@@ -91,6 +91,32 @@ pub trait LocationAware<'a>: PathAware<'a> {
     fn list_all_moves(&self) -> Vec<Self::Move>;
     fn project_move(&self, start_cell: &Self::Cell, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
 
+    fn get_cells_one_move_from_cell(&self, cell: &Self::Cell) -> Vec<&Self::Move> {
+        let moves = self.list_all_moves();
+
+        todo!()
+        /*
+        moves
+            .iter()
+            .filter(|m| {
+                if let Ok(cell) = self.project_move(cell, m) { true }
+                else { false }
+            })
+        .collect()
+        */
+
+
+        // solution that does not use iterator (needs mut v: Vec<_>)
+        // for possible_move in moves {
+        //     if let Ok(new_cell) = self.project_move(cell, &possible_move)
+        //     {
+        //         v.push(new_cell);
+        //     }
+        // }
+
+        // v
+    }
+
     fn get_cells_traversed_in_path(&'a self, index_of_path: usize) -> Vec<&Self::Cell>{
         let path = self.get_path_from_index(index_of_path);
         let mut cells_in_path = vec![path.start_location];
@@ -111,7 +137,26 @@ pub trait LocationAware<'a>: PathAware<'a> {
             .expect("the path to have at least one cell in it (the starting cell)")
     }
 
-    fn advance_and_split_all_paths(&mut self) {todo!()}
+    fn advance_and_split_all_paths(&mut self) {
+        // get all paths
+        let paths = self.get_paths();
+        // let mut new_paths = Vec::new();
+
+        for (_path_index, _path) in paths.iter().enumerate() {
+            // get the last cell
+            // self.get_a_paths_last_cell(path_index)
+            
+            // get all legal moves from last cell
+            
+
+            // create new paths that have each taken one of the legal moves
+
+            // push new paths to new_paths
+        }
+
+        // set paths to new paths
+        todo!()
+    }
 }
 
 #[cfg(test)]
