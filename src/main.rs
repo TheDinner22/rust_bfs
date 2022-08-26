@@ -115,8 +115,8 @@ impl<'a> LocationAware<'a> for TicTacToeBoard<'a> {
         vec![Moves::Up, Moves::Down, Moves::Left, Moves::Right]
     }
 
-    fn project_move(&self, _start_cell: &'a Self::Cell, _move_to_try: &Self::Move) -> Result<&'a Self::Cell, Box<dyn std::error::Error>> {
-        let res: &'a Self::Cell = &self.squares[0];
+    fn project_move(&self, start_cell: &'a Self::Cell, move_to_try: &Self::Move) -> Result<&'a Self::Cell, Box<dyn std::error::Error>> {
+        let res = &self.squares[0];
         Ok( res )
     }
 }
@@ -129,3 +129,4 @@ fn main(){
     board.set_square_state(8, SquareContent::X);
 
 }
+

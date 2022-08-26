@@ -55,7 +55,9 @@ where
     }
 }
 
-pub trait PathAware<'a> { //todo get shortest working path
+// 'a is how long a cell lives (longer than self or any of the paths)
+pub trait PathAware<'a>
+{ 
     type Cell: PartialEq + 'a;
     type Move: PartialEq + Copy;
 
@@ -97,7 +99,8 @@ pub trait PathAware<'a> { //todo get shortest working path
     }
 }
 // next you must fix this!!!
-pub trait LocationAware<'a>: PathAware<'a> {
+pub trait LocationAware<'a>: PathAware<'a>
+{
     fn list_all_moves(&self) -> Vec<Self::Move>;
     fn project_move(&self, start_cell: &'a Self::Cell, move_to_try: &Self::Move) -> Result<&'a Self::Cell, Box<dyn Error>>;
 
@@ -133,10 +136,10 @@ pub trait LocationAware<'a>: PathAware<'a> {
             .expect("the path to have at least one cell in it (the starting cell)")
     }
 
-    fn advance_and_split_all_paths(&mut self) {
+    fn branch_all_paths(&self) -> Vec<Path<'a, Self::Cell, Self::Move>> {
         let paths = self.get_paths();
 
-        let new_paths: Vec<Path<Self::Cell, Self::Move>> = paths
+        paths
             .iter()
             .enumerate()
             .map(|(i, _)| self.get_a_paths_last_cell(i)) // last cell
@@ -145,9 +148,13 @@ pub trait LocationAware<'a>: PathAware<'a> {
             .flat_map(|(i, moves)| {
                 moves.iter().map(move |m| paths[i].clone_and_append(*m)).collect::<Vec<Path<Self::Cell, Self::Move>>>() // todo make better index bad
             })
-            .collect();
+            .collect()
+    }
 
-        self.set_paths(new_paths)
+    fn advance_and_split_all_paths(&mut self) {
+        let new_paths = self.branch_all_paths();
+
+        self.set_paths(new_paths);
     }
 }
 
