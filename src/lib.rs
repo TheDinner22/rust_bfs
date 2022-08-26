@@ -40,8 +40,11 @@ where
     }
 
     pub fn clone_and_append(&self, next_move: Move) -> Self {
+        let mut new_path_taken = self.path_taken.clone();
+        new_path_taken.push(next_move);
+
         Path {
-            path_taken: self.path_taken.clone(),
+            path_taken: new_path_taken,
             start_location: self.start_location,
         }
     }
@@ -99,9 +102,9 @@ pub trait LocationAware<'a>: PathAware<'a> {
     fn project_move(&self, start_cell: &Self::Cell, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
 
     // todo del me?
-    fn get_legal_moves_from_cell(&self, cell_index: &Self::Cell) -> Vec<&Self::Move> {
+    fn get_legal_moves_from_cell(&self, cell_index: &Self::Cell) -> Vec<Self::Move> {
         self.list_all_moves()
-            .iter()
+            .into_iter()
             .filter(|possible_move| {
                 self.project_move(cell_index, possible_move)
                     .is_ok()
@@ -129,20 +132,21 @@ pub trait LocationAware<'a>: PathAware<'a> {
             .expect("the path to have at least one cell in it (the starting cell)")
     }
 
-    fn advance_and_split_all_paths(&mut self) {
-        self.set_paths(
-            self.get_paths()
-                .iter()
-                .enumerate()
-                .map(|(i, _)| self.get_a_paths_last_cell(i)) // last cell
-                .map(|cell| self.get_legal_moves_from_cell(cell)) // Vec<Vec<Moves>>
-                .enumerate()
-                .map(|(i, moves)| {
-                    moves.iter().map(|m| paths[i].clone_and_append(**m)) // todo make better index bad
-                })
-                .flatten()
-                .collect()
-        );
+    fn advance_and_split_all_paths(&'a mut self) {
+        let paths = self.get_paths();
+
+        let _new_paths: Vec<Path<Self::Cell, Self::Move>> = paths
+            .iter()
+            .enumerate()
+            .map(|(i, _)| self.get_a_paths_last_cell(i)) // last cell
+            .map(|cell| self.get_legal_moves_from_cell(cell)) // Vec<Vec<Moves>>
+            .enumerate()
+            .flat_map(|(i, moves)| {
+                moves.iter().map(move |m| paths[i].clone_and_append(*m)).collect::<Vec<Path<Self::Cell, Self::Move>>>() // todo make better index bad
+            })
+            .collect();
+
+        // self.set_paths(new_paths) // get this working!
     }
 }
 
