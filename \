@@ -115,9 +115,22 @@ impl<'a> LocationAware<'a> for TicTacToeBoard<'a> {
         vec![Moves::Up, Moves::Down, Moves::Left, Moves::Right]
     }
 
-    fn project_move(&self, _start_cell: &'a Self::Cell, _move_to_try: &Self::Move) -> Result<&'a Self::Cell, Box<dyn std::error::Error>> {
-        let res: &'a Self::Cell = &self.squares[0];
-        Ok( res )
+    fn project_move(&self, start_cell: &'a Self::Cell, move_to_try: &Self::Move) -> Result<&'a Self::Cell, Box<dyn std::error::Error>> {
+        let index = start_cell.id;
+
+        match move_to_try {
+            Moves::Up => {
+                if index > 2 {
+                    Ok(&self.squares[(index - 3) as usize])
+                }
+                else {
+                    Err(MoveError::boxed_new("cannot move up"))
+                }
+            },
+            Moves::Down => todo!(),
+            Moves::Left => todo!(),
+            Moves::Right => todo!(),
+        }
     }
 }
 

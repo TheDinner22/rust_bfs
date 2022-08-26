@@ -10,7 +10,7 @@ use std::{error::Error, slice::Iter};
 
 pub struct Path<'a, Cell, Move>
 where
-    Cell: PartialEq,
+    Cell: PartialEq + 'a,
     Move: PartialEq + Copy,
 {
     start_location: &'a Cell,
@@ -19,7 +19,7 @@ where
 
 impl<'a, Cell, Move> Path<'a, Cell, Move>
 where
-    Cell: PartialEq,
+    Cell: PartialEq + 'a,
     Move: PartialEq + Copy,
 {
     // create a new path
@@ -56,10 +56,10 @@ where
 }
 
 pub trait PathAware<'a> { //todo get shortest working path
-    type Cell: PartialEq;
+    type Cell: PartialEq + 'a;
     type Move: PartialEq + Copy;
 
-    fn get_paths<'b>(&self) -> &'b Vec<Path<Self::Cell, Self::Move>>;
+    fn get_paths(&self) -> &Vec<Path<'a, Self::Cell, Self::Move>>;
     fn create_path(&mut self, start_cell: &'a Self::Cell, moves: Option<Vec<Self::Move>>);
     fn set_paths(&mut self, new_paths: Vec<Path<'a, Self::Cell, Self::Move>>); // truncates old paths
     fn remove_path_by_index(&mut self, index_to_remove: usize);
@@ -68,7 +68,7 @@ pub trait PathAware<'a> { //todo get shortest working path
         todo!(); // need to create a (get cells that compose path function)
     }
 
-    fn get_path_from_index(&'a self, index: usize) -> &'a Path<Self::Cell, Self::Move> {
+    fn get_path_from_index(&self, index: usize) -> &Path<'a, Self::Cell, Self::Move> {
         let all_paths = self.get_paths();
 
         if index >= all_paths.len() { panic!("index that was passed to get_path_from_index was out of range") }
@@ -82,7 +82,7 @@ pub trait PathAware<'a> { //todo get shortest working path
         }
     }
 
-    fn check_and_trim_paths(&'a mut self) {
+    fn check_and_trim_paths(&mut self) {
         let mut path_ids_to_remove = vec![];
 
         let all_paths = self.get_paths();
@@ -99,43 +99,44 @@ pub trait PathAware<'a> { //todo get shortest working path
 // next you must fix this!!!
 pub trait LocationAware<'a>: PathAware<'a> {
     fn list_all_moves(&self) -> Vec<Self::Move>;
-    fn project_move(&self, start_cell: &Self::Cell, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
+    fn project_move(&self, start_cell: &'a Self::Cell, move_to_try: &Self::Move) -> Result<&'a Self::Cell, Box<dyn Error>>;
 
-    // todo del me?
-    fn get_legal_moves_from_cell(&self, cell_index: &Self::Cell) -> Vec<Self::Move> {
+    fn get_legal_moves_from_cell(&self, cell: &'a Self::Cell) -> Vec<Self::Move> {
         self.list_all_moves()
             .into_iter()
             .filter(|possible_move| {
-                self.project_move(cell_index, possible_move)
+                self.project_move(cell, possible_move)
                     .is_ok()
             })
             .collect()
     }
 
-    fn get_cells_traversed_in_path(&'a self, index_of_path: usize) -> Vec<&Self::Cell>{
+    fn get_cells_traversed_in_path(&self, index_of_path: usize) -> Vec<&'a Self::Cell>{
         let path = self.get_path_from_index(index_of_path);
         let mut cells_in_path = vec![path.start_location];
 
-        for (i, move_made) in path.iter().enumerate() {
-            cells_in_path.push(
-                    self.project_move(cells_in_path[i], move_made)
-                        .expect("The value returned from project to be the Ok varient becuase this is a move that WAS MADE")
-                );
-        }
-
+        path
+            .iter()
+            .for_each(|m| {
+                cells_in_path.push(
+                    self.project_move(cells_in_path.last().unwrap(), m)
+                        .expect("move to be valid")
+                )
+            });
+        
         cells_in_path
     }
 
-    fn get_a_paths_last_cell(&'a self, path_index: usize) -> &Self::Cell {
+    fn get_a_paths_last_cell(&self, path_index: usize) -> &'a Self::Cell {
         self.get_cells_traversed_in_path(path_index)
             .pop()
             .expect("the path to have at least one cell in it (the starting cell)")
     }
 
-    fn advance_and_split_all_paths(&'a mut self) {
+    fn advance_and_split_all_paths(&mut self) {
         let paths = self.get_paths();
 
-        let _new_paths: Vec<Path<Self::Cell, Self::Move>> = paths
+        let new_paths: Vec<Path<Self::Cell, Self::Move>> = paths
             .iter()
             .enumerate()
             .map(|(i, _)| self.get_a_paths_last_cell(i)) // last cell
@@ -146,7 +147,7 @@ pub trait LocationAware<'a>: PathAware<'a> {
             })
             .collect();
 
-        // self.set_paths(new_paths) // get this working!
+        self.set_paths(new_paths)
     }
 }
 
