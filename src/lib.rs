@@ -55,22 +55,21 @@ where
     }
 }
 
-// 'a is how long a cell lives (longer than self or any of the paths)
-pub trait PathAware<'a>
+pub trait PathAware
 { 
-    type Cell: PartialEq + 'a;
+    type Cell: PartialEq;
     type Move: PartialEq + Copy;
 
-    fn get_paths(&self) -> &Vec<Path<'a, Self::Cell, Self::Move>>;
-    fn create_path(&mut self, start_cell: &'a Self::Cell, moves: Option<Vec<Self::Move>>);
-    fn set_paths(&mut self, new_paths: Vec<Path<'a, Self::Cell, Self::Move>>); // truncates old paths
+    fn get_paths(&self) -> &Vec<Path<Self::Cell, Self::Move>>;
+    fn create_path(&mut self, start_cell: &Self::Cell, moves: Option<Vec<Self::Move>>);
+    fn set_paths(&mut self, new_paths: Vec<Path<Self::Cell, Self::Move>>); // truncates old paths
     fn remove_path_by_index(&mut self, index_to_remove: usize);
 
     fn path_back_tracks(&self, _index_of_path_to_check: usize) -> bool {
         todo!(); // need to create a (get cells that compose path function)
     }
 
-    fn get_path_from_index(&self, index: usize) -> &Path<'a, Self::Cell, Self::Move> {
+    fn get_path_from_index(&self, index: usize) -> &Path<Self::Cell, Self::Move> {
         let all_paths = self.get_paths();
 
         if index >= all_paths.len() { panic!("index that was passed to get_path_from_index was out of range") }
@@ -99,12 +98,12 @@ pub trait PathAware<'a>
     }
 }
 // next you must fix this!!!
-pub trait LocationAware<'a>: PathAware<'a>
+pub trait LocationAware: PathAware
 {
     fn list_all_moves(&self) -> Vec<Self::Move>;
-    fn project_move(&self, start_cell: &'a Self::Cell, move_to_try: &Self::Move) -> Result<&'a Self::Cell, Box<dyn Error>>;
+    fn project_move(&self, start_cell: &Self::Cell, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn Error>>;
 
-    fn get_legal_moves_from_cell(&self, cell: &'a Self::Cell) -> Vec<Self::Move> {
+    fn get_legal_moves_from_cell(&self, cell: &Self::Cell) -> Vec<Self::Move> {
         self.list_all_moves()
             .into_iter()
             .filter(|possible_move| {
@@ -114,7 +113,7 @@ pub trait LocationAware<'a>: PathAware<'a>
             .collect()
     }
 
-    fn get_cells_traversed_in_path(&self, index_of_path: usize) -> Vec<&'a Self::Cell>{
+    fn get_cells_traversed_in_path(&self, index_of_path: usize) -> Vec<&Self::Cell>{
         let path = self.get_path_from_index(index_of_path);
         let mut cells_in_path = vec![path.start_location];
 
@@ -130,13 +129,13 @@ pub trait LocationAware<'a>: PathAware<'a>
         cells_in_path
     }
 
-    fn get_a_paths_last_cell(&self, path_index: usize) -> &'a Self::Cell {
+    fn get_a_paths_last_cell(&self, path_index: usize) -> &Self::Cell {
         self.get_cells_traversed_in_path(path_index)
             .pop()
             .expect("the path to have at least one cell in it (the starting cell)")
     }
 
-    fn branch_all_paths(&self) -> Vec<Path<'a, Self::Cell, Self::Move>> {
+    fn branch_all_paths(&self) -> Vec<Path<Self::Cell, Self::Move>> {
         let paths = self.get_paths();
 
         paths
@@ -151,11 +150,11 @@ pub trait LocationAware<'a>: PathAware<'a>
             .collect()
     }
 
-    fn advance_and_split_all_paths(&mut self) {
-        let new_paths = self.branch_all_paths();
-
-        self.set_paths(new_paths);
-    }
+    // fn advance_and_split_all_paths(&mut self) {
+    //     let new_paths = self.branch_all_paths();
+    //
+    //     self.set_paths(new_paths);
+    // }
 }
 
 #[cfg(test)]
