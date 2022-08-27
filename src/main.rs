@@ -1,4 +1,5 @@
 // this is for testing only making sure remote works
+/*
 use rust_bfs::*;
 
 struct TicTacToeBoard<'a> {
@@ -115,7 +116,7 @@ impl<'a> LocationAware<'a> for TicTacToeBoard<'a> {
         vec![Moves::Up, Moves::Down, Moves::Left, Moves::Right]
     }
 
-    fn project_move(&self, start_cell: &'a Self::Cell, move_to_try: &Self::Move) -> Result<&'a Self::Cell, Box<dyn std::error::Error>> {
+    fn project_move(&self, start_cell: &'a Self::Cell, move_to_try: &Self::Move) -> Result<&Self::Cell, Box<dyn std::error::Error>> {
         let res = &self.squares[0];
         Ok( res )
     }
@@ -129,4 +130,5 @@ fn main(){
     board.set_square_state(8, SquareContent::X);
 
 }
-
+*/
+fn main () { }
