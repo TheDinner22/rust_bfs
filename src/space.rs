@@ -5,6 +5,8 @@ pub trait RepresentsSpace {
     type Cell: HasId<ID = Self::CellId>;
     type Move: Copy;
 
+    fn list_all_moves(&self) -> Vec<Self::Move>;
+
     fn get_cell_from_id(&self, cell_id: Self::CellId) -> &Self::Cell;
     fn project_move(&self, start_cell_id: Self::CellId, moov: &Self::Move) -> Self::CellId;
 
@@ -29,16 +31,25 @@ mod tests {
         }
     }
 
+    #[derive(Clone, Copy)]
+    enum Move {
+        Right,
+    }
+
     impl RepresentsSpace for Maze {
         type CellId = i32;
 
         type Cell = Cell;
 
+        type Move = Move;
+
+        fn list_all_moves(&self) -> Vec<Self::Move> {
+            vec![Move::Right]
+        }
+
         fn get_cell_from_id(&self, cell_id: Self::CellId) -> &Self::Cell {
             &self.cells[cell_id as usize]
         }
-
-        type Move = i32;
 
         fn project_move(&self, _start_cell_id: Self::CellId, _moov: &Self::Move) -> Self::CellId {
             todo!()

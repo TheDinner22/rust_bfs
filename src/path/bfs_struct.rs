@@ -86,6 +86,10 @@ mod tests {
 
         type Move = ExampleMove;
 
+        fn list_all_moves(&self) -> Vec<Self::Move> {
+            vec![ExampleMove::Up]
+        }
+
         fn get_cell_from_id(&self, cell_id: Self::CellId) -> &Self::Cell {
             &self.cells[cell_id as usize]
         }
