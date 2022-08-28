@@ -16,7 +16,7 @@ where
     Move: Copy,
 {
     pub fn new(start_cell: &'cell Cell, moves: Option<Vec<Move>>) -> Self {
-        Path { start_cell, moves_taken: moves.unwrap_or(vec![]) }
+        Path { start_cell, moves_taken: moves.unwrap_or_default() }
     }
 
     fn clone_and_append(&self, move_to_append: Move) -> Self {
