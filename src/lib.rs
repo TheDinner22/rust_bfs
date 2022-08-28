@@ -69,7 +69,7 @@ mod tests {
 
         let p: Path<ExampleCell, ExampleMove> = Path::new(
             &random_cell,
-            Some(vec![ExampleMove::Up])
+            Some(vec![])
         );
 
         let p_with_move_up: Path<ExampleCell, ExampleMove> = Path::new(
