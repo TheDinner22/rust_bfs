@@ -1,20 +1,20 @@
-use crate::{uid, space::RepresentsSpace};
+use crate::space::RepresentsSpace;
 
 use super::path_struct::Path;
 
-pub struct BfsAbleSpace<'cell, 'space, Cell, Move, Space>
+pub struct BfsAbleSpace<'space, CellId, Move, Space>
 where
-    Cell: uid::HasId,
+    CellId: Copy,
     Move: Copy,
     Space: RepresentsSpace
 {
-    paths: Vec<Path<'cell, Cell, Move>>,
+    paths: Vec<Path<CellId, Move>>,
     space: &'space Space,
 }
 
-impl<'cell, 'space, Cell, Move, Space> BfsAbleSpace<'cell, 'space, Cell, Move, Space>
+impl<'space, CellId, Move, Space> BfsAbleSpace<'space, CellId, Move, Space>
 where
-    Cell: uid::HasId,
+    CellId: Copy,
     Move: Copy,
     Space: RepresentsSpace,
 {
@@ -22,15 +22,15 @@ where
         BfsAbleSpace { paths: vec![], space }
     }
 
-    pub fn create_path(&mut self, start_cell: &'cell Cell, moves: Option<Vec<Move>>) {
-        self.paths.push( Path::new(start_cell, moves) )
+    pub fn create_path(&mut self, start_cell_id: CellId, moves: Option<Vec<Move>>) {
+        self.paths.push( Path::new(start_cell_id, moves) )
     }
 
-    pub fn get_paths(&self) -> &Vec<Path<'cell, Cell, Move>> {
+    pub fn get_paths(&self) -> &Vec<Path<CellId, Move>> {
         &self.paths
     }
 
-    pub fn set_paths(&mut self, new_paths: Vec<Path<'cell, Cell, Move>>) {
+    pub fn set_paths(&mut self, new_paths: Vec<Path<CellId, Move>>) {
         self.paths = new_paths
     }
 
@@ -38,7 +38,7 @@ where
         self.paths.remove(path_index);
     }
 
-    pub fn get_path_from_index(&self, path_index: usize) -> &Path<'cell, Cell, Move> {
+    pub fn get_path_from_index(&self, path_index: usize) -> &Path<CellId, Move> {
         &self.get_paths()[path_index]
     }
 
@@ -60,7 +60,7 @@ mod tests {
         cells: Vec<ExampleCell>
     }
 
-    #[derive(PartialEq, Debug)]
+    #[derive(PartialEq, Debug, Clone, Copy)]
     struct ExampleCell {
         id: i32
     }
@@ -104,11 +104,11 @@ mod tests {
     #[test]
     fn create_path_in_bfs_space() {
         let a_space = ExampleSpace::default();
-        let mut bfs: BfsAbleSpace<ExampleCell, ExampleMove, ExampleSpace> = BfsAbleSpace::new( &a_space );
+        let mut bfs: BfsAbleSpace<i32, ExampleMove, ExampleSpace> = BfsAbleSpace::new( &a_space );
 
         assert!(bfs.paths.is_empty());
 
-        bfs.create_path(&bfs.space.cells[0], Some(vec![ExampleMove::Up]));
+        bfs.create_path(0, Some(vec![ExampleMove::Up]));
 
         assert_eq!(bfs.paths.len(), 1);
 
@@ -116,7 +116,7 @@ mod tests {
 
         assert!(bfs.paths.is_empty());
 
-        bfs.create_path(&bfs.space.cells[0], Some(vec![ExampleMove::Up]));
+        bfs.create_path(0, Some(vec![ExampleMove::Up]));
 
         assert_eq!(bfs.paths.len(), 1);
 
