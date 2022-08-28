@@ -172,3 +172,10 @@ fn main(){
     assert_eq!(5, ez_maze.squares.cells[5].id);
     assert_eq!(6, ez_maze.squares.cells[6].id);
 }
+
+/*
+consider using uid
+https://docs.rs/crate/uid/latest
+see docs here
+https://docs.rs/uid/latest/uid/struct.Id.html
+*/
