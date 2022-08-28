@@ -84,8 +84,14 @@ mod tests {
 
         type Cell = ExampleCell;
 
+        type Move = ExampleMove;
+
         fn get_cell_from_id(&self, cell_id: Self::CellId) -> &Self::Cell {
             &self.cells[cell_id as usize]
+        }
+
+        fn project_move(&self, _start_cell_id: Self::CellId, _moov: &Self::Move) -> Self::CellId {
+            todo!()
         }
     }
 

@@ -1,10 +1,12 @@
 use crate::uid::HasId;
 
 pub trait RepresentsSpace {
-    type CellId;
+    type CellId: Copy;
     type Cell: HasId<ID = Self::CellId>;
+    type Move: Copy;
 
     fn get_cell_from_id(&self, cell_id: Self::CellId) -> &Self::Cell;
+    fn project_move(&self, start_cell_id: Self::CellId, moov: &Self::Move) -> Self::CellId;
 
     fn get_id_from_cell (&self, cell: &Self::Cell) -> Self::CellId {
         cell.get_uid()
@@ -34,6 +36,12 @@ mod tests {
 
         fn get_cell_from_id(&self, cell_id: Self::CellId) -> &Self::Cell {
             &self.cells[cell_id as usize]
+        }
+
+        type Move = i32;
+
+        fn project_move(&self, _start_cell_id: Self::CellId, _moov: &Self::Move) -> Self::CellId {
+            todo!()
         }
     }
 
