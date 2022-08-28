@@ -4,7 +4,7 @@ use super::path_struct::Path;
 
 pub struct BfsAbleSpace<'cell, Cell, Move, Space>
 where
-    Cell: uid::IsUnique,
+    Cell: uid::HasId,
     Move: Copy
 {
     paths: Vec<Path<'cell, Cell, Move>>,
@@ -13,7 +13,7 @@ where
 
 impl<'cell, Cell, Move, Space> BfsAbleSpace<'cell, Cell, Move, Space>
 where
-    Cell: uid::IsUnique,
+    Cell: uid::HasId,
     Move: Copy
 {
     pub fn new (space: Space) -> Self {

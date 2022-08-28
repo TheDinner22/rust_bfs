@@ -4,7 +4,7 @@ mod path_struct {
     #[derive(PartialEq, Debug)]
     pub struct Path<'cell, Cell, Move>
     where
-        Cell: uid::IsUnique,
+        Cell: uid::HasId,
         Move: Copy,
     {
         start_cell: &'cell Cell,
@@ -13,7 +13,7 @@ mod path_struct {
 
     impl<'cell, Cell, Move> Path<'cell, Cell, Move>
     where
-        Cell: uid::IsUnique,
+        Cell: uid::HasId,
         Move: Copy,
     {
         pub fn new(start_cell: &'cell Cell, moves: Option<Vec<Move>>) -> Self {
@@ -43,7 +43,7 @@ mod path_struct {
             id: i32
         }
 
-        impl uid::IsUnique for ExampleCell {
+        impl uid::HasId for ExampleCell {
             type ID = i32;
 
             fn get_uid(&self) -> Self::ID {
