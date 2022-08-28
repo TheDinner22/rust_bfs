@@ -1,5 +1,6 @@
 mod uid;
 
+#[derive(PartialEq, Debug)]
 pub struct Path<'cell, Cell, Move>
 where
     Cell: uid::IsUnique,
@@ -14,7 +15,7 @@ where
     Cell: uid::IsUnique,
     Move: Copy,
 {
-    fn new(start_cell: &'cell Cell, moves: Option<Vec<Move>>) -> Self {
+    pub fn new(start_cell: &'cell Cell, moves: Option<Vec<Move>>) -> Self {
         Path { start_cell, moves_taken: moves.unwrap_or(vec![]) }
     }
 
@@ -28,9 +29,58 @@ where
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
+    // vars needed by multiple tests
+    #[derive(Clone, Copy, PartialEq, Debug)]
+    enum ExampleMove {
+        Up,
+    }
+
+    #[derive(Debug, PartialEq)]
+    struct ExampleCell {
+        id: i32
+    }
+
+    impl uid::IsUnique for ExampleCell {
+        type ID = i32;
+
+        fn get_uid(&self) -> Self::ID {
+            self.id
+        }
+    }
+
     #[test]
-    fn it_works() {
-        assert_eq!(1+1, 2);
+    fn create_path() {
+        let random_cell = ExampleCell { id: 22 };
+
+        let p: Path<ExampleCell, ExampleMove> = Path::new(
+            &random_cell,
+            Some(vec![])
+        );
+
+        assert_eq!(p.moves_taken, vec![]);
+        assert_eq!(p.start_cell, &ExampleCell{ id: 22});
+    }
+
+    #[test]
+    fn clone_path(){
+        let random_cell = ExampleCell { id: 345 };
+
+        let p: Path<ExampleCell, ExampleMove> = Path::new(
+            &random_cell,
+            Some(vec![ExampleMove::Up])
+        );
+
+        let p_with_move_up: Path<ExampleCell, ExampleMove> = Path::new(
+            &random_cell,
+            Some(vec![ExampleMove::Up])
+        );
+
+        let new_p = p.clone_and_append(ExampleMove::Up);
+
+        assert_eq!(new_p, p_with_move_up);
+        assert_ne!(p, new_p);
     }
 }
 // some ideas and sudo code
