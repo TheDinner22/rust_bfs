@@ -1,5 +1,31 @@
 mod uid;
 
+pub struct Path<'cell, Cell, Move>
+where
+    Cell: uid::IsUnique,
+    Move: Copy,
+{
+    start_cell: &'cell Cell,
+    moves_taken: Vec<Move>
+}
+
+impl<'cell, Cell, Move> Path<'cell, Cell, Move>
+where
+    Cell: uid::IsUnique,
+    Move: Copy,
+{
+    fn new(start_cell: &'cell Cell, moves: Option<Vec<Move>>) -> Self {
+        Path { start_cell, moves_taken: moves.unwrap_or(vec![]) }
+    }
+
+    fn clone_and_append(&self, move_to_append: Move) -> Self {
+        let mut new_moves_taken = self.moves_taken.clone();
+        new_moves_taken.push(move_to_append);
+        
+        Path { start_cell: self.start_cell, moves_taken: new_moves_taken }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
