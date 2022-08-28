@@ -1,22 +1,24 @@
-use crate::uid;
+use crate::{uid, space::RepresentsSpace};
 
 use super::path_struct::Path;
 
-pub struct BfsAbleSpace<'cell, Cell, Move, Space>
+pub struct BfsAbleSpace<'cell, 'space, Cell, Move, Space>
 where
     Cell: uid::HasId,
-    Move: Copy
+    Move: Copy,
+    Space: RepresentsSpace
 {
     paths: Vec<Path<'cell, Cell, Move>>,
-    space: Space,
+    space: &'space Space,
 }
 
-impl<'cell, Cell, Move, Space> BfsAbleSpace<'cell, Cell, Move, Space>
+impl<'cell, 'space, Cell, Move, Space> BfsAbleSpace<'cell, 'space, Cell, Move, Space>
 where
     Cell: uid::HasId,
-    Move: Copy
+    Move: Copy,
+    Space: RepresentsSpace,
 {
-    pub fn new (space: Space) -> Self {
+    pub fn new (space: &'space Space) -> Self {
         BfsAbleSpace { paths: vec![], space }
     }
 
@@ -48,50 +50,72 @@ where
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use crate::uid::IsUnique;
-//
-//     // use super::*;
-//
-//     struct ExampleSpace {
-//         cells: Vec<ExampleCell>
-//     }
-//
-//     #[derive(PartialEq, Debug)]
-//     struct ExampleCell {
-//         id: i32
-//     }
-//
-//     impl IsUnique for ExampleCell {
-//         type ID = i32;
-//
-//         fn get_uid(&self) -> Self::ID {
-//             self.id
-//         }
-//     }
-//
-//     impl Default for ExampleSpace {
-//         fn default() -> Self {
-//             ExampleSpace { cells: (0..20).into_iter().map(|n| ExampleCell { id: n }).collect() }
-//         }
-//     }
-//
-//     #[derive(Clone, Copy)]
-//     #[derive(Debug)]
-//     enum ExampleMove {
-//         Up
-//     }
-//
-//     #[test]
-//     fn create_path_in_bfs_space() {
-//         todo!()
-//         make this when the space trait in impl
-//         let mut bfs: BfsAbleSpace<ExampleCell, ExampleMove, ExampleSpace> = BfsAbleSpace::new( ExampleSpace::default() );
-//
-//         assert!(bfs.paths.is_empty());
-//
-//         bfs.create_path(&bfs.space.cells[0], Some(vec![ExampleMove::Up]))
-//     }
-// }
+#[cfg(test)]
+mod tests {
+    use crate::{uid::HasId, space::RepresentsSpace};
 
+    use super::*;
+
+    struct ExampleSpace {
+        cells: Vec<ExampleCell>
+    }
+
+    #[derive(PartialEq, Debug)]
+    struct ExampleCell {
+        id: i32
+    }
+
+    impl HasId for ExampleCell {
+        type ID = i32;
+
+        fn get_uid(&self) -> Self::ID {
+            self.id
+        }
+    }
+
+    impl Default for ExampleSpace {
+        fn default() -> Self {
+            ExampleSpace { cells: (0..20).into_iter().map(|n| ExampleCell { id: n }).collect() }
+        }
+    }
+
+    impl RepresentsSpace for ExampleSpace {
+        type CellId = i32;
+
+        type Cell = ExampleCell;
+
+        fn get_cell_from_id(&self, cell_id: Self::CellId) -> &Self::Cell {
+            &self.cells[cell_id as usize]
+        }
+    }
+
+    #[derive(Clone, Copy)]
+    #[derive(Debug)]
+    enum ExampleMove {
+        Up
+    }
+
+    #[test]
+    fn create_path_in_bfs_space() {
+        let a_space = ExampleSpace::default();
+        let mut bfs: BfsAbleSpace<ExampleCell, ExampleMove, ExampleSpace> = BfsAbleSpace::new( &a_space );
+
+        assert!(bfs.paths.is_empty());
+
+        bfs.create_path(&bfs.space.cells[0], Some(vec![ExampleMove::Up]));
+
+        assert_eq!(bfs.paths.len(), 1);
+
+        bfs.remove_path_by_index(0);
+
+        assert!(bfs.paths.is_empty());
+
+        bfs.create_path(&bfs.space.cells[0], Some(vec![ExampleMove::Up]));
+
+        assert_eq!(bfs.paths.len(), 1);
+
+        bfs.set_paths(vec![]);
+
+        assert!(bfs.paths.is_empty());
+    }
+}
