@@ -1,3 +1,5 @@
+mod uid;
+
 #[cfg(test)]
 mod tests {
     #[test]
