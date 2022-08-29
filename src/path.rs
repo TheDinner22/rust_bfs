@@ -18,11 +18,18 @@ mod path_struct {
             Path { start_cell_id, moves_taken: moves.unwrap_or_default() }
         }
 
-        pub fn clone_and_append(&self, move_to_append: Move) -> Self {
+        fn clone_and_append(&self, move_to_append: Move) -> Self {
             let mut new_moves_taken = self.moves_taken.clone();
             new_moves_taken.push(move_to_append);
             
             Path { start_cell_id: self.start_cell_id, moves_taken: new_moves_taken }
+        }
+
+        pub fn into_multiple_paths(&self, moves_to_append: Vec<Move>) -> Vec<Self> {
+            moves_to_append
+                .into_iter()
+                .map(|m| self.clone_and_append(m))
+                .collect()
         }
     }
 
