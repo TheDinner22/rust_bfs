@@ -35,7 +35,7 @@ mod path_struct {
             new_path
         }
 
-        pub fn into_multiple_paths(&self, moves_to_append: Vec<Move>) -> Vec<Self> {
+        pub fn branch_into_multiple_paths(&self, moves_to_append: Vec<Move>) -> Vec<Self> {
             moves_to_append
                 .into_iter()
                 .map(|m| self.clone_and_append(m))
@@ -93,4 +93,4 @@ mod path_struct {
     }
 }
 
-mod bfs_struct;
+pub mod bfs_struct;

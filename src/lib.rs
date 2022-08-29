@@ -2,6 +2,10 @@ mod uid;
 mod path;
 mod space;
 
+pub use space::RepresentsSpace;
+pub use uid::HasId;
+pub use crate::path::bfs_struct::BfsAbleSpace;
+
 // some ideas and sudo code
 //
 // need an array or array like struct or something (must somehow, loose-ly represent some space, 2d, 3d, etc.)

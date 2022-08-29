@@ -22,27 +22,27 @@ where
         BfsAbleSpace { paths: vec![], space }
     }
 
-    pub fn create_path(&mut self, start_cell_id: CellId, moves: Option<Vec<Move>>) {
+    fn create_path(&mut self, start_cell_id: CellId, moves: Option<Vec<Move>>) {
         self.paths.push( Path::new(start_cell_id, moves) )
     }
 
-    pub fn get_paths(&self) -> &Vec<Path<CellId, Move>> {
+    fn get_paths(&self) -> &Vec<Path<CellId, Move>> {
         &self.paths
     }
 
-    pub fn set_paths(&mut self, new_paths: Vec<Path<CellId, Move>>) {
+    fn set_paths(&mut self, new_paths: Vec<Path<CellId, Move>>) {
         self.paths = new_paths
     }
 
-    pub fn remove_path_by_index(&mut self, path_index: usize) {
+    fn remove_path_by_index(&mut self, path_index: usize) {
         self.paths.remove(path_index);
     }
 
-    pub fn get_path_from_index(&self, path_index: &usize) -> &Path<CellId, Move> {
+    fn get_path_from_index(&self, path_index: &usize) -> &Path<CellId, Move> {
         &self.get_paths()[*path_index]
     }
 
-    pub fn remove_paths_by_indexes(&mut self, indexes_to_remove: Vec<usize>){
+    fn remove_paths_by_indexes(&mut self, indexes_to_remove: Vec<usize>){
         indexes_to_remove
             .into_iter()
             .enumerate()
@@ -106,11 +106,11 @@ where
     fn compute_new_paths(&self) -> Vec<Path<CellId, Move>>{
         self.paths
             .iter()
-            .flat_map(|p| p.into_multiple_paths(self.space.get_all_legal_moves_from_cell(&p.start_cell_id)))
+            .flat_map(|p| p.branch_into_multiple_paths(self.space.get_all_legal_moves_from_cell(&p.start_cell_id)))
             .collect()
     }
 
-    pub fn do_bfs(&mut self, start_cell_id: CellId, target_cell_id: CellId) -> Option<Path<CellId, Move>> {
+    pub fn bfs(&mut self, start_cell_id: CellId, target_cell_id: CellId) -> Option<Path<CellId, Move>> {
         self.set_paths(vec![]);
 
         // create the first path
