@@ -10,12 +10,12 @@ pub trait RepresentsSpace {
     fn get_cell_from_id(&self, cell_id: Self::CellId) -> &Self::Cell;
     fn project_move(&self, start_cell_id: &Self::CellId, moov: &Self::Move) -> Option<Self::CellId>;
 
-    fn get_all_legal_moves_from_cell(&self, cell_id: Self::CellId) -> Vec<Self::Move> {
+    fn get_all_legal_moves_from_cell(&self, cell_id: &Self::CellId) -> Vec<Self::Move> {
         let all_moves = self.list_all_moves();
 
         all_moves
             .into_iter()
-            .filter(|m| self.project_move(&cell_id, m).is_some())
+            .filter(|m| self.project_move(cell_id, m).is_some())
             .collect()
     }
 

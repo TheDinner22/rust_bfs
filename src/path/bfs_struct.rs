@@ -72,8 +72,11 @@ where
         self.get_cell_ids_in_path(path_index).pop()
     }
 
-    fn compute_new_paths(){
-        todo!()
+    fn compute_new_paths(&self) -> Vec<Path<CellId, Move>>{
+        self.paths
+            .iter()
+            .flat_map(|p| p.into_multiple_paths(self.space.get_all_legal_moves_from_cell(&p.start_cell_id)))
+            .collect()
     }
 
     pub fn do_bfs(&mut self, _start_cell_id: CellId, _target_cell_id: CellId) -> Path<CellId, Move> {
