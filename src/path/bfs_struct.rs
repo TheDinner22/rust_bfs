@@ -48,6 +48,26 @@ where
             .enumerate()
             .for_each(|(i, r)| { self.remove_path_by_index(r - i) });
     }
+
+    fn get_cell_ids_in_path(&self, path_index: usize) -> Vec<CellId>{
+        todo!()
+    }
+
+    fn get_paths_last_cell(&self, path_index: usize) -> CellId{
+        todo!()
+    }
+
+    fn get_all_legal_moves_from_cell(&self, cell_id: CellId) -> Vec<Move> {
+        todo!()
+    }
+
+    fn step(){
+        todo!()
+    }
+
+    pub fn do_bfs(&mut self, start_cell_id: CellId, target_cell_id: CellId) -> Path<CellId, Move> {
+        todo!()
+    }
 }
 
 #[cfg(test)]
