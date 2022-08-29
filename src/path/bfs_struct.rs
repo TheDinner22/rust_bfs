@@ -6,7 +6,7 @@ pub struct BfsAbleSpace<'space, CellId, Move, Space>
 where
     CellId: Copy,
     Move: Copy,
-    Space: RepresentsSpace
+    Space: RepresentsSpace<CellId = CellId, Move = Move>
 {
     paths: Vec<Path<CellId, Move>>,
     space: &'space Space,
@@ -16,7 +16,7 @@ impl<'space, CellId, Move, Space> BfsAbleSpace<'space, CellId, Move, Space>
 where
     CellId: Copy,
     Move: Copy,
-    Space: RepresentsSpace,
+    Space: RepresentsSpace<CellId = CellId, Move = Move>
 {
     pub fn new (space: &'space Space) -> Self {
         BfsAbleSpace { paths: vec![], space }
@@ -50,22 +50,33 @@ where
     }
 
     fn get_cell_ids_in_path(&self, path_index: usize) -> Vec<CellId>{
+        let path = self.get_path_from_index(path_index);
+
+        let mut cell_ids = vec![path.start_cell_id];
+
+        path.moves_taken
+            .iter()
+            .for_each(|m| {
+                cell_ids.push(
+                    self.space.project_move(
+                        cell_ids.last().expect("cell_ids to never be empty"),
+                        m
+                    ).expect("move to be valid because it was made")
+                )
+            });
+
+        cell_ids
+    }
+
+    fn get_paths_last_cell(&self, path_index: usize) -> Option<CellId>{
+        self.get_cell_ids_in_path(path_index).pop()
+    }
+
+    fn compute_new_paths(){
         todo!()
     }
 
-    fn get_paths_last_cell(&self, path_index: usize) -> CellId{
-        todo!()
-    }
-
-    fn get_all_legal_moves_from_cell(&self, cell_id: CellId) -> Vec<Move> {
-        todo!()
-    }
-
-    fn step(){
-        todo!()
-    }
-
-    pub fn do_bfs(&mut self, start_cell_id: CellId, target_cell_id: CellId) -> Path<CellId, Move> {
+    pub fn do_bfs(&mut self, _start_cell_id: CellId, _target_cell_id: CellId) -> Path<CellId, Move> {
         todo!()
     }
 }
@@ -114,7 +125,7 @@ mod tests {
             &self.cells[cell_id as usize]
         }
 
-        fn project_move(&self, _start_cell_id: Self::CellId, _moov: &Self::Move) -> Self::CellId {
+        fn project_move(&self, _start_cell_id: &Self::CellId, _moov: &Self::Move) -> Option<Self::CellId> {
             todo!()
         }
     }

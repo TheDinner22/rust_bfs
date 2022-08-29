@@ -5,8 +5,8 @@ mod path_struct {
         CellId: Copy,
         Move: Copy,
     {
-        start_cell_id: CellId,
-        moves_taken: Vec<Move>
+        pub start_cell_id: CellId,
+        pub moves_taken: Vec<Move>
     }
 
     impl<CellId, Move> Path<CellId, Move>
