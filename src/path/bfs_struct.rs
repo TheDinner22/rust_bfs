@@ -4,7 +4,7 @@ use super::path_struct::Path;
 
 pub struct BfsAbleSpace<'space, CellId, Move, Space>
 where
-    CellId: Copy,
+    CellId: Copy + PartialEq,
     Move: Copy,
     Space: RepresentsSpace<CellId = CellId, Move = Move>
 {
@@ -14,7 +14,7 @@ where
 
 impl<'space, CellId, Move, Space> BfsAbleSpace<'space, CellId, Move, Space>
 where
-    CellId: Copy,
+    CellId: Copy + PartialEq,
     Move: Copy,
     Space: RepresentsSpace<CellId = CellId, Move = Move>
 {
@@ -38,8 +38,8 @@ where
         self.paths.remove(path_index);
     }
 
-    pub fn get_path_from_index(&self, path_index: usize) -> &Path<CellId, Move> {
-        &self.get_paths()[path_index]
+    pub fn get_path_from_index(&self, path_index: &usize) -> &Path<CellId, Move> {
+        &self.get_paths()[*path_index]
     }
 
     pub fn remove_paths_by_indexes(&mut self, indexes_to_remove: Vec<usize>){
@@ -49,7 +49,31 @@ where
             .for_each(|(i, r)| { self.remove_path_by_index(r - i) });
     }
 
-    fn get_cell_ids_in_path(&self, path_index: usize) -> Vec<CellId>{
+    fn path_backtracks(&self, path_index: &usize) -> bool {
+        let cell_ids = self.get_cell_ids_in_path(path_index);
+
+        (1..cell_ids.len()).any(|i| cell_ids[i..].contains(&cell_ids[i-1]))
+    }
+
+    // this might accidentally delete the shortest path, be careful
+    fn check_and_trim_paths(&mut self) {
+        self.remove_paths_by_indexes(
+            // want this to be iter of only bad/dead paths
+            self.get_paths()
+                .iter()
+                .enumerate()
+                .filter(|(i, _)| self.path_backtracks(i)) // does it backtrack?
+                .filter(|(i, _)| { // can it expand?
+                    self.space.get_all_legal_moves_from_cell(
+                        &self.get_paths_last_cell(i) // HEREHEREHfhjsdfhd
+                    ).is_empty()
+                })
+                .map(|(i, _)| i)
+                .collect()
+        );
+    }
+
+    fn get_cell_ids_in_path(&self, path_index: &usize) -> Vec<CellId>{
         let path = self.get_path_from_index(path_index);
 
         let mut cell_ids = vec![path.start_cell_id];
@@ -68,8 +92,15 @@ where
         cell_ids
     }
 
-    fn get_paths_last_cell(&self, path_index: usize) -> Option<CellId>{
-        self.get_cell_ids_in_path(path_index).pop()
+    fn get_paths_last_cell(&self, path_index: &usize) -> CellId{
+        self
+            .get_cell_ids_in_path(path_index)
+            .pop()
+            .expect("path to have at least one cell")
+    }
+
+    fn path_contains_target(&self, path_index: usize, target_cell_id: CellId) -> bool {
+        self.get_cell_ids_in_path(&path_index).contains(&target_cell_id)
     }
 
     fn compute_new_paths(&self) -> Vec<Path<CellId, Move>>{
@@ -79,8 +110,29 @@ where
             .collect()
     }
 
-    pub fn do_bfs(&mut self, _start_cell_id: CellId, _target_cell_id: CellId) -> Path<CellId, Move> {
-        todo!()
+    pub fn do_bfs(&mut self, start_cell_id: CellId, target_cell_id: CellId) -> Option<Path<CellId, Move>> {
+        self.set_paths(vec![]);
+
+        // create the first path
+        self.create_path(start_cell_id, Some(vec![]));
+
+        loop {
+            let paths = self.get_paths();
+
+            // are we done?
+            if paths.is_empty() { return None;}
+            for (i, path) in self.get_paths().iter().enumerate() {
+                if self.path_contains_target(i, target_cell_id) {
+                    return Some(path.clone());
+                }
+            }
+
+            // step paths
+            self.set_paths(self.compute_new_paths());
+
+            // trim paths
+            self.check_and_trim_paths();
+        }
     }
 }
 
