@@ -9,6 +9,16 @@ mod path_struct {
         pub moves_taken: Vec<Move>
     }
 
+    impl<CellId, Move> Clone for Path<CellId, Move>
+    where
+        CellId: Copy + PartialEq,
+        Move: Copy,
+    {
+        fn clone(&self) -> Self {
+            Path { start_cell_id: self.start_cell_id, moves_taken: self.moves_taken.clone() }
+        }
+    }
+
     impl<CellId, Move> Path<CellId, Move>
     where
         CellId: Copy + PartialEq,
@@ -19,10 +29,10 @@ mod path_struct {
         }
 
         fn clone_and_append(&self, move_to_append: Move) -> Self {
-            let mut new_moves_taken = self.moves_taken.clone();
-            new_moves_taken.push(move_to_append);
-            
-            Path { start_cell_id: self.start_cell_id, moves_taken: new_moves_taken }
+            let mut new_path = self.clone();
+            new_path.moves_taken.push(move_to_append);
+
+            new_path
         }
 
         pub fn into_multiple_paths(&self, moves_to_append: Vec<Move>) -> Vec<Self> {
