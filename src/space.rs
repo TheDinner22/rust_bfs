@@ -1,7 +1,7 @@
 use crate::uid::HasId;
 
 pub trait RepresentsSpace {
-    type CellId: Copy;
+    type CellId: Copy + PartialEq;
     type Cell: HasId<ID = Self::CellId>;
     type Move: Copy;
 

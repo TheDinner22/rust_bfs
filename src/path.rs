@@ -2,7 +2,7 @@ mod path_struct {
     #[derive(PartialEq, Debug)]
     pub struct Path<CellId, Move>
     where
-        CellId: Copy,
+        CellId: Copy + PartialEq,
         Move: Copy,
     {
         pub start_cell_id: CellId,
@@ -11,7 +11,7 @@ mod path_struct {
 
     impl<CellId, Move> Path<CellId, Move>
     where
-        CellId: Copy,
+        CellId: Copy + PartialEq,
         Move: Copy,
     {
         pub fn new(start_cell_id: CellId, moves: Option<Vec<Move>>) -> Self {
