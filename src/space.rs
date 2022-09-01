@@ -1,14 +1,23 @@
 use crate::uid::HasId;
 
 pub trait RepresentsSpace {
-    type CellId: Copy;
+    type CellId: Copy + PartialEq;
     type Cell: HasId<ID = Self::CellId>;
     type Move: Copy;
 
     fn list_all_moves(&self) -> Vec<Self::Move>;
 
     fn get_cell_from_id(&self, cell_id: Self::CellId) -> &Self::Cell;
-    fn project_move(&self, start_cell_id: Self::CellId, moov: &Self::Move) -> Self::CellId;
+    fn project_move(&self, start_cell_id: &Self::CellId, moov: &Self::Move) -> Option<Self::CellId>;
+
+    fn get_all_legal_moves_from_cell(&self, cell_id: &Self::CellId) -> Vec<Self::Move> {
+        let all_moves = self.list_all_moves();
+
+        all_moves
+            .into_iter()
+            .filter(|m| self.project_move(cell_id, m).is_some())
+            .collect()
+    }
 
     fn get_id_from_cell (&self, cell: &Self::Cell) -> Self::CellId {
         cell.get_uid()
@@ -51,7 +60,7 @@ mod tests {
             &self.cells[cell_id as usize]
         }
 
-        fn project_move(&self, _start_cell_id: Self::CellId, _moov: &Self::Move) -> Self::CellId {
+        fn project_move(&self, _start_cell_id: &Self::CellId, _moov: &Self::Move) -> Option<Self::CellId> {
             todo!()
         }
     }

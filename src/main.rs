@@ -1,9 +1,29 @@
-// this is for testing only making sure remote works
-// use rust_bfs::*;
+// this is for testing only making sure remote works 
+use rust_bfs::{BfsAbleSpace, RepresentsSpace, HasId};
 
 #[derive(Default)]
 struct Maze {
     squares: Grid,
+}
+
+impl RepresentsSpace for Maze {
+    type CellId = usize;
+
+    type Cell = Square;
+
+    type Move = Move;
+
+    fn list_all_moves(&self) -> Vec<Self::Move> {
+        vec![Move::Up, Move::Left, Move::Right, Move::Down]
+    }
+
+    fn get_cell_from_id(&self, cell_id: Self::CellId) -> &Self::Cell {
+        &self.squares.cells[cell_id as usize]
+    }
+
+    fn project_move(&self, start_cell_id: &Self::CellId, moov: &Self::Move) -> Option<Self::CellId> {
+        self.squares.attempt_move_from_cell(*start_cell_id, moov)
+    }
 }
 
 struct Grid {
@@ -114,12 +134,12 @@ impl Grid {
 }
 
 struct Square{
-    id: i32,
+    id: usize,
     is_wall: bool,
 }
 
 impl Square {
-    fn new(id:i32, is_wall: bool) -> Self {
+    fn new(id: usize, is_wall: bool) -> Self {
         Square {
             id,
             is_wall,
@@ -131,6 +151,15 @@ impl Square {
     }
 }
 
+impl HasId for Square {
+    type ID = usize;
+
+    fn get_uid(&self) -> Self::ID {
+        self.id
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
 enum Move {
     Up,
     Down,
@@ -141,6 +170,11 @@ enum Move {
 fn main(){
     let ez_maze = Maze::default();
 
+    let mut b = BfsAbleSpace::new(&ez_maze);
+
+    println!("{:?}", b.bfs(7, 10));
+
+    /*
     assert_eq!(ez_maze.squares.area(), 18);
 
     // failing moves
@@ -171,6 +205,7 @@ fn main(){
     assert_eq!(4, ez_maze.squares.cells[4].id);
     assert_eq!(5, ez_maze.squares.cells[5].id);
     assert_eq!(6, ez_maze.squares.cells[6].id);
+    */
 }
 
 /*
