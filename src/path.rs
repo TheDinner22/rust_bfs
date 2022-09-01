@@ -28,6 +28,12 @@ mod path_struct {
             Path { start_cell_id, moves_taken: moves.unwrap_or_default() }
         }
 
+        pub fn clone_with_new_id(&self, new_id: CellId) -> Self{
+            let mut new_path = self.clone();
+            new_path.start_cell_id = new_id;
+            new_path
+        }
+
         fn clone_and_append(&self, move_to_append: Move) -> Self {
             let mut new_path = self.clone();
             new_path.moves_taken.push(move_to_append);
