@@ -174,7 +174,12 @@ fn main(){
 
     let mut b = BfsAbleSpace::new(&ez_maze);
 
-    println!("{:?}", b.bfs(7, 11));
+    println!("{:?}", b.bfs(7, 10));
+    println!("{:?}", b.bfs(10, 7));
+    println!("{:?}", b.bfs(8, 9));
+    println!("{:?}", b.bfs(9, 8));
+    println!("{:?}", b.bfs(8, 10));
+    println!("{:?}", b.bfs(1, 10));
 
     /*
     assert_eq!(ez_maze.squares.area(), 18);
