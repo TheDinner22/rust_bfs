@@ -65,13 +65,19 @@ where
             self.get_paths()
                 .iter()
                 .enumerate()
-                .filter(|(i, _)| self.path_backtracks(i)) // does it backtrack?
-                .filter(|(i, _)| { // can it expand?
-                    self.space.get_all_legal_moves_from_cell(
-                        &self.get_paths_last_cell(i)
-                    ).is_empty()
+                .filter_map(|(i, _)| {
+                    let cannot_move = self.space
+                        .get_all_legal_moves_from_cell(
+                            &self.get_paths_last_cell(&i)
+                        ).is_empty();
+
+                    if self.path_backtracks(&i) || cannot_move {
+                        Some(i)
+                    }
+                    else {
+                        None
+                    }
                 })
-                .map(|(i, _)| i)
                 .collect()
         );
     }
