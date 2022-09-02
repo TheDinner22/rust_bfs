@@ -2,11 +2,13 @@ use crate::space::RepresentsSpace;
 
 use super::path_struct::Path;
 
+use std::fmt::Debug;
+
 #[derive(Debug)]
 pub struct BfsAbleSpace<'space, CellId, Move, Space>
 where
-    CellId: Copy + PartialEq,
-    Move: Copy,
+    CellId: Copy + PartialEq + Debug,
+    Move: Copy + Debug,
     Space: RepresentsSpace<CellId = CellId, Move = Move>
 {
     paths: Vec<Path<CellId, Move>>,
@@ -15,9 +17,9 @@ where
 
 impl<'space, CellId, Move, Space> BfsAbleSpace<'space, CellId, Move, Space>
 where
-    CellId: Copy + PartialEq,
-    Move: Copy,
-    Space: RepresentsSpace<CellId = CellId, Move = Move>
+    CellId: Copy + PartialEq + Debug,
+    Move: Copy + Debug,
+    Space: RepresentsSpace<CellId = CellId, Move = Move> + Debug
 {
     pub fn new (space: &'space Space) -> Self {
         BfsAbleSpace { paths: vec![], space }
@@ -66,7 +68,7 @@ where
                 .filter(|(i, _)| self.path_backtracks(i)) // does it backtrack?
                 .filter(|(i, _)| { // can it expand?
                     self.space.get_all_legal_moves_from_cell(
-                        &self.get_paths_last_cell(i) // HEREHEREHfhjsdfhd
+                        &self.get_paths_last_cell(i)
                     ).is_empty()
                 })
                 .map(|(i, _)| i)
@@ -107,7 +109,8 @@ where
     fn compute_new_paths(&self) -> Vec<Path<CellId, Move>>{
         self.paths
             .iter()
-            .flat_map(|p| p.branch_into_multiple_paths(self.space.get_all_legal_moves_from_cell(&p.start_cell_id)))
+            .enumerate()
+            .flat_map(|(i, p)| p.branch_into_multiple_paths(self.space.get_all_legal_moves_from_cell(&self.get_paths_last_cell(&i))))
             .collect()
     }
 
@@ -143,6 +146,7 @@ mod tests {
 
     use super::*;
 
+    #[derive(Debug)]
     struct ExampleSpace {
         cells: Vec<ExampleCell>
     }

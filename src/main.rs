@@ -1,7 +1,7 @@
 // this is for testing only making sure remote works 
 use rust_bfs::{BfsAbleSpace, RepresentsSpace, HasId};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct Maze {
     squares: Grid,
 }
@@ -26,6 +26,7 @@ impl RepresentsSpace for Maze {
     }
 }
 
+#[derive(Debug)]
 struct Grid {
     cells: Vec<Square>,
     width: usize,
@@ -133,6 +134,7 @@ impl Grid {
     }
 }
 
+#[derive(Debug)]
 struct Square{
     id: usize,
     is_wall: bool,
@@ -172,7 +174,7 @@ fn main(){
 
     let mut b = BfsAbleSpace::new(&ez_maze);
 
-    println!("{:?}", b.bfs(7, 10));
+    println!("{:?}", b.bfs(7, 11));
 
     /*
     assert_eq!(ez_maze.squares.area(), 18);
