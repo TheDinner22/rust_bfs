@@ -2,6 +2,7 @@ use crate::space::RepresentsSpace;
 
 use super::path_struct::Path;
 
+#[derive(Debug)]
 pub struct BfsAbleSpace<'space, CellId, Move, Space>
 where
     CellId: Copy + PartialEq,
