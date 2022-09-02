@@ -38,6 +38,7 @@ struct Grid {
 // 6  7  8  9  10 11
 // 12 13 14 15 16 17
 impl Default for Grid {
+    // create basic 1x4 maze with walls
     fn default() -> Self {
         let cells = (0..18)
             .into_iter()
